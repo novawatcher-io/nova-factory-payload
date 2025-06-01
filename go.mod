@@ -1,4 +1,4 @@
-module nova-factory-payload
+module github.com/novawatcher-io/nova-factory-payload
 
 go 1.24.3
 
