@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	DeviceReportService_ReportContainer_FullMethodName = "/metric.grpc.v1.DeviceReportService/ReportContainer"
+	DeviceReportService_ReportDeviceInfo_FullMethodName = "/metric.grpc.v1.DeviceReportService/ReportDeviceInfo"
 )
 
 // DeviceReportServiceClient is the client API for DeviceReportService service.
@@ -27,7 +27,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DeviceReportServiceClient interface {
 	// 更新容器信息
-	ReportContainer(ctx context.Context, in *DeviceData, opts ...grpc.CallOption) (*NodeRes, error)
+	ReportDeviceInfo(ctx context.Context, in *ExportMetricsServiceRequest, opts ...grpc.CallOption) (*NodeRes, error)
 }
 
 type deviceReportServiceClient struct {
@@ -38,9 +38,9 @@ func NewDeviceReportServiceClient(cc grpc.ClientConnInterface) DeviceReportServi
 	return &deviceReportServiceClient{cc}
 }
 
-func (c *deviceReportServiceClient) ReportContainer(ctx context.Context, in *DeviceData, opts ...grpc.CallOption) (*NodeRes, error) {
+func (c *deviceReportServiceClient) ReportDeviceInfo(ctx context.Context, in *ExportMetricsServiceRequest, opts ...grpc.CallOption) (*NodeRes, error) {
 	out := new(NodeRes)
-	err := c.cc.Invoke(ctx, DeviceReportService_ReportContainer_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, DeviceReportService_ReportDeviceInfo_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (c *deviceReportServiceClient) ReportContainer(ctx context.Context, in *Dev
 // for forward compatibility
 type DeviceReportServiceServer interface {
 	// 更新容器信息
-	ReportContainer(context.Context, *DeviceData) (*NodeRes, error)
+	ReportDeviceInfo(context.Context, *ExportMetricsServiceRequest) (*NodeRes, error)
 	mustEmbedUnimplementedDeviceReportServiceServer()
 }
 
@@ -60,8 +60,8 @@ type DeviceReportServiceServer interface {
 type UnimplementedDeviceReportServiceServer struct {
 }
 
-func (UnimplementedDeviceReportServiceServer) ReportContainer(context.Context, *DeviceData) (*NodeRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReportContainer not implemented")
+func (UnimplementedDeviceReportServiceServer) ReportDeviceInfo(context.Context, *ExportMetricsServiceRequest) (*NodeRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReportDeviceInfo not implemented")
 }
 func (UnimplementedDeviceReportServiceServer) mustEmbedUnimplementedDeviceReportServiceServer() {}
 
@@ -76,20 +76,20 @@ func RegisterDeviceReportServiceServer(s grpc.ServiceRegistrar, srv DeviceReport
 	s.RegisterService(&DeviceReportService_ServiceDesc, srv)
 }
 
-func _DeviceReportService_ReportContainer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeviceData)
+func _DeviceReportService_ReportDeviceInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExportMetricsServiceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DeviceReportServiceServer).ReportContainer(ctx, in)
+		return srv.(DeviceReportServiceServer).ReportDeviceInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DeviceReportService_ReportContainer_FullMethodName,
+		FullMethod: DeviceReportService_ReportDeviceInfo_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeviceReportServiceServer).ReportContainer(ctx, req.(*DeviceData))
+		return srv.(DeviceReportServiceServer).ReportDeviceInfo(ctx, req.(*ExportMetricsServiceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -102,8 +102,8 @@ var DeviceReportService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*DeviceReportServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ReportContainer",
-			Handler:    _DeviceReportService_ReportContainer_Handler,
+			MethodName: "ReportDeviceInfo",
+			Handler:    _DeviceReportService_ReportDeviceInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

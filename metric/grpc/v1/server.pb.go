@@ -20,16 +20,31 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type DeviceData struct {
+// AnyValue is used to represent any type of attribute value. AnyValue may contain a
+// primitive value such as a string or integer or it may contain an arbitrary nested
+// object containing arrays, key-value lists and primitives.
+type AnyValue struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DeviceId int32 `protobuf:"varint,1,opt,name=deviceId,proto3" json:"deviceId,omitempty"`
+	// The value is one of the listed fields. It is valid for all values to be unspecified
+	// in which case this AnyValue is considered to be "empty".
+	//
+	// Types that are assignable to Value:
+	//
+	//	*AnyValue_StringValue
+	//	*AnyValue_BoolValue
+	//	*AnyValue_IntValue
+	//	*AnyValue_DoubleValue
+	//	*AnyValue_ArrayValue
+	//	*AnyValue_KvlistValue
+	//	*AnyValue_BytesValue
+	Value isAnyValue_Value `protobuf_oneof:"value"`
 }
 
-func (x *DeviceData) Reset() {
-	*x = DeviceData{}
+func (x *AnyValue) Reset() {
+	*x = AnyValue{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_manifest_protobuf_metric_server_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -37,13 +52,13 @@ func (x *DeviceData) Reset() {
 	}
 }
 
-func (x *DeviceData) String() string {
+func (x *AnyValue) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeviceData) ProtoMessage() {}
+func (*AnyValue) ProtoMessage() {}
 
-func (x *DeviceData) ProtoReflect() protoreflect.Message {
+func (x *AnyValue) ProtoReflect() protoreflect.Message {
 	mi := &file_manifest_protobuf_metric_server_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -55,16 +70,266 @@ func (x *DeviceData) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeviceData.ProtoReflect.Descriptor instead.
-func (*DeviceData) Descriptor() ([]byte, []int) {
+// Deprecated: Use AnyValue.ProtoReflect.Descriptor instead.
+func (*AnyValue) Descriptor() ([]byte, []int) {
 	return file_manifest_protobuf_metric_server_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *DeviceData) GetDeviceId() int32 {
-	if x != nil {
-		return x.DeviceId
+func (m *AnyValue) GetValue() isAnyValue_Value {
+	if m != nil {
+		return m.Value
+	}
+	return nil
+}
+
+func (x *AnyValue) GetStringValue() string {
+	if x, ok := x.GetValue().(*AnyValue_StringValue); ok {
+		return x.StringValue
+	}
+	return ""
+}
+
+func (x *AnyValue) GetBoolValue() bool {
+	if x, ok := x.GetValue().(*AnyValue_BoolValue); ok {
+		return x.BoolValue
+	}
+	return false
+}
+
+func (x *AnyValue) GetIntValue() int64 {
+	if x, ok := x.GetValue().(*AnyValue_IntValue); ok {
+		return x.IntValue
 	}
 	return 0
+}
+
+func (x *AnyValue) GetDoubleValue() float64 {
+	if x, ok := x.GetValue().(*AnyValue_DoubleValue); ok {
+		return x.DoubleValue
+	}
+	return 0
+}
+
+func (x *AnyValue) GetArrayValue() *ArrayValue {
+	if x, ok := x.GetValue().(*AnyValue_ArrayValue); ok {
+		return x.ArrayValue
+	}
+	return nil
+}
+
+func (x *AnyValue) GetKvlistValue() *KeyValueList {
+	if x, ok := x.GetValue().(*AnyValue_KvlistValue); ok {
+		return x.KvlistValue
+	}
+	return nil
+}
+
+func (x *AnyValue) GetBytesValue() []byte {
+	if x, ok := x.GetValue().(*AnyValue_BytesValue); ok {
+		return x.BytesValue
+	}
+	return nil
+}
+
+type isAnyValue_Value interface {
+	isAnyValue_Value()
+}
+
+type AnyValue_StringValue struct {
+	StringValue string `protobuf:"bytes,1,opt,name=string_value,json=stringValue,proto3,oneof"`
+}
+
+type AnyValue_BoolValue struct {
+	BoolValue bool `protobuf:"varint,2,opt,name=bool_value,json=boolValue,proto3,oneof"`
+}
+
+type AnyValue_IntValue struct {
+	IntValue int64 `protobuf:"varint,3,opt,name=int_value,json=intValue,proto3,oneof"`
+}
+
+type AnyValue_DoubleValue struct {
+	DoubleValue float64 `protobuf:"fixed64,4,opt,name=double_value,json=doubleValue,proto3,oneof"`
+}
+
+type AnyValue_ArrayValue struct {
+	ArrayValue *ArrayValue `protobuf:"bytes,5,opt,name=array_value,json=arrayValue,proto3,oneof"`
+}
+
+type AnyValue_KvlistValue struct {
+	KvlistValue *KeyValueList `protobuf:"bytes,6,opt,name=kvlist_value,json=kvlistValue,proto3,oneof"`
+}
+
+type AnyValue_BytesValue struct {
+	BytesValue []byte `protobuf:"bytes,7,opt,name=bytes_value,json=bytesValue,proto3,oneof"`
+}
+
+func (*AnyValue_StringValue) isAnyValue_Value() {}
+
+func (*AnyValue_BoolValue) isAnyValue_Value() {}
+
+func (*AnyValue_IntValue) isAnyValue_Value() {}
+
+func (*AnyValue_DoubleValue) isAnyValue_Value() {}
+
+func (*AnyValue_ArrayValue) isAnyValue_Value() {}
+
+func (*AnyValue_KvlistValue) isAnyValue_Value() {}
+
+func (*AnyValue_BytesValue) isAnyValue_Value() {}
+
+// KeyValueList is a list of KeyValue messages. We need KeyValueList as a message
+// since `oneof` in AnyValue does not allow repeated fields. Everywhere else where we need
+// a list of KeyValue messages (e.g. in Span) we use `repeated KeyValue` directly to
+// avoid unnecessary extra wrapping (which slows down the protocol). The 2 approaches
+// are semantically equivalent.
+type KeyValueList struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// A collection of key/value pairs of key-value pairs. The list may be empty (may
+	// contain 0 elements).
+	// The keys MUST be unique (it is not allowed to have more than one
+	// value with the same key).
+	Values []*KeyValue `protobuf:"bytes,1,rep,name=values,proto3" json:"values,omitempty"`
+}
+
+func (x *KeyValueList) Reset() {
+	*x = KeyValueList{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_metric_server_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *KeyValueList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KeyValueList) ProtoMessage() {}
+
+func (x *KeyValueList) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_metric_server_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KeyValueList.ProtoReflect.Descriptor instead.
+func (*KeyValueList) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_metric_server_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *KeyValueList) GetValues() []*KeyValue {
+	if x != nil {
+		return x.Values
+	}
+	return nil
+}
+
+// ArrayValue is a list of AnyValue messages. We need ArrayValue as a message
+// since oneof in AnyValue does not allow repeated fields.
+type ArrayValue struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Array of values. The array may be empty (contain 0 elements).
+	Values []*AnyValue `protobuf:"bytes,1,rep,name=values,proto3" json:"values,omitempty"`
+}
+
+func (x *ArrayValue) Reset() {
+	*x = ArrayValue{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_metric_server_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ArrayValue) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ArrayValue) ProtoMessage() {}
+
+func (x *ArrayValue) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_metric_server_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ArrayValue.ProtoReflect.Descriptor instead.
+func (*ArrayValue) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_metric_server_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ArrayValue) GetValues() []*AnyValue {
+	if x != nil {
+		return x.Values
+	}
+	return nil
+}
+
+// KeyValue is a key-value pair that is used to store Span attributes, Link
+// attributes, etc.
+type KeyValue struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Value *AnyValue `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (x *KeyValue) Reset() {
+	*x = KeyValue{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_metric_server_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *KeyValue) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KeyValue) ProtoMessage() {}
+
+func (x *KeyValue) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_metric_server_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KeyValue.ProtoReflect.Descriptor instead.
+func (*KeyValue) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_metric_server_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *KeyValue) GetValue() *AnyValue {
+	if x != nil {
+		return x.Value
+	}
+	return nil
 }
 
 type NodeRes struct {
@@ -78,7 +343,7 @@ type NodeRes struct {
 func (x *NodeRes) Reset() {
 	*x = NodeRes{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_manifest_protobuf_metric_server_proto_msgTypes[1]
+		mi := &file_manifest_protobuf_metric_server_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -91,7 +356,7 @@ func (x *NodeRes) String() string {
 func (*NodeRes) ProtoMessage() {}
 
 func (x *NodeRes) ProtoReflect() protoreflect.Message {
-	mi := &file_manifest_protobuf_metric_server_proto_msgTypes[1]
+	mi := &file_manifest_protobuf_metric_server_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -104,7 +369,7 @@ func (x *NodeRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeRes.ProtoReflect.Descriptor instead.
 func (*NodeRes) Descriptor() ([]byte, []int) {
-	return file_manifest_protobuf_metric_server_proto_rawDescGZIP(), []int{1}
+	return file_manifest_protobuf_metric_server_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *NodeRes) GetCode() int32 {
@@ -114,22 +379,499 @@ func (x *NodeRes) GetCode() int32 {
 	return 0
 }
 
+type DeviceMetric struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	DeviceId   int32  `protobuf:"varint,1,opt,name=deviceId,proto3" json:"deviceId,omitempty"`
+	TemplateId uint64 `protobuf:"varint,2,opt,name=templateId,proto3" json:"templateId,omitempty"`
+	// The set of key/value pairs that uniquely identify the timeseries from
+	// where this point belongs. The list may be empty (may contain 0 elements).
+	// Attribute keys MUST be unique (it is not allowed to have more than one
+	// attribute with the same key).
+	Attributes []*KeyValue `protobuf:"bytes,3,rep,name=attributes,proto3" json:"attributes,omitempty"`
+	// StartTimeUnixNano is optional but strongly encouraged, see the
+	// the detailed comments above Metric.
+	//
+	// Value is UNIX Epoch time in nanoseconds since 00:00:00 UTC on 1 January
+	// 1970.
+	StartTimeUnixNano uint64 `protobuf:"fixed64,4,opt,name=start_time_unix_nano,json=startTimeUnixNano,proto3" json:"start_time_unix_nano,omitempty"`
+	// TimeUnixNano is required, see the detailed comments above Metric.
+	//
+	// Value is UNIX Epoch time in nanoseconds since 00:00:00 UTC on 1 January
+	// 1970.
+	TimeUnixNano uint64 `protobuf:"fixed64,5,opt,name=time_unix_nano,json=timeUnixNano,proto3" json:"time_unix_nano,omitempty"`
+	// The value itself.  A point is considered invalid when one of the recognized
+	// value fields is not present inside this oneof.
+	//
+	// Types that are assignable to Value:
+	//
+	//	*DeviceMetric_AsDouble
+	//	*DeviceMetric_AsInt
+	Value isDeviceMetric_Value `protobuf_oneof:"value"`
+}
+
+func (x *DeviceMetric) Reset() {
+	*x = DeviceMetric{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_metric_server_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DeviceMetric) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeviceMetric) ProtoMessage() {}
+
+func (x *DeviceMetric) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_metric_server_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeviceMetric.ProtoReflect.Descriptor instead.
+func (*DeviceMetric) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_metric_server_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *DeviceMetric) GetDeviceId() int32 {
+	if x != nil {
+		return x.DeviceId
+	}
+	return 0
+}
+
+func (x *DeviceMetric) GetTemplateId() uint64 {
+	if x != nil {
+		return x.TemplateId
+	}
+	return 0
+}
+
+func (x *DeviceMetric) GetAttributes() []*KeyValue {
+	if x != nil {
+		return x.Attributes
+	}
+	return nil
+}
+
+func (x *DeviceMetric) GetStartTimeUnixNano() uint64 {
+	if x != nil {
+		return x.StartTimeUnixNano
+	}
+	return 0
+}
+
+func (x *DeviceMetric) GetTimeUnixNano() uint64 {
+	if x != nil {
+		return x.TimeUnixNano
+	}
+	return 0
+}
+
+func (m *DeviceMetric) GetValue() isDeviceMetric_Value {
+	if m != nil {
+		return m.Value
+	}
+	return nil
+}
+
+func (x *DeviceMetric) GetAsDouble() float64 {
+	if x, ok := x.GetValue().(*DeviceMetric_AsDouble); ok {
+		return x.AsDouble
+	}
+	return 0
+}
+
+func (x *DeviceMetric) GetAsInt() int64 {
+	if x, ok := x.GetValue().(*DeviceMetric_AsInt); ok {
+		return x.AsInt
+	}
+	return 0
+}
+
+type isDeviceMetric_Value interface {
+	isDeviceMetric_Value()
+}
+
+type DeviceMetric_AsDouble struct {
+	AsDouble float64 `protobuf:"fixed64,6,opt,name=as_double,json=asDouble,proto3,oneof"`
+}
+
+type DeviceMetric_AsInt struct {
+	AsInt int64 `protobuf:"fixed64,7,opt,name=as_int,json=asInt,proto3,oneof"`
+}
+
+func (*DeviceMetric_AsDouble) isDeviceMetric_Value() {}
+
+func (*DeviceMetric_AsInt) isDeviceMetric_Value() {}
+
+// A collection of Metrics produced by an Scope.
+type ScopeMetrics struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// A list of metrics that originate from an instrumentation library.
+	Metrics []*DeviceMetric `protobuf:"bytes,1,rep,name=metrics,proto3" json:"metrics,omitempty"`
+	// The Schema URL, if known. This is the identifier of the Schema that the metric data
+	// is recorded in. Notably, the last part of the URL path is the version number of the
+	// schema: http[s]://server[:port]/path/<version>. To learn more about Schema URL see
+	// https://opentelemetry.io/docs/specs/otel/schemas/#schema-url
+	// This schema_url applies to all metrics in the "metrics" field.
+	SchemaUrl string `protobuf:"bytes,2,opt,name=schema_url,json=schemaUrl,proto3" json:"schema_url,omitempty"`
+}
+
+func (x *ScopeMetrics) Reset() {
+	*x = ScopeMetrics{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_metric_server_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ScopeMetrics) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScopeMetrics) ProtoMessage() {}
+
+func (x *ScopeMetrics) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_metric_server_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScopeMetrics.ProtoReflect.Descriptor instead.
+func (*ScopeMetrics) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_metric_server_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ScopeMetrics) GetMetrics() []*DeviceMetric {
+	if x != nil {
+		return x.Metrics
+	}
+	return nil
+}
+
+func (x *ScopeMetrics) GetSchemaUrl() string {
+	if x != nil {
+		return x.SchemaUrl
+	}
+	return ""
+}
+
+// Resource information.
+type Resource struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Set of attributes that describe the resource.
+	// Attribute keys MUST be unique (it is not allowed to have more than one
+	// attribute with the same key).
+	Attributes []*KeyValue `protobuf:"bytes,1,rep,name=attributes,proto3" json:"attributes,omitempty"`
+	// dropped_attributes_count is the number of dropped attributes. If the value is 0, then
+	// no attributes were dropped.
+	DroppedAttributesCount uint32 `protobuf:"varint,2,opt,name=dropped_attributes_count,json=droppedAttributesCount,proto3" json:"dropped_attributes_count,omitempty"`
+}
+
+func (x *Resource) Reset() {
+	*x = Resource{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_metric_server_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Resource) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Resource) ProtoMessage() {}
+
+func (x *Resource) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_metric_server_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Resource.ProtoReflect.Descriptor instead.
+func (*Resource) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_metric_server_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *Resource) GetAttributes() []*KeyValue {
+	if x != nil {
+		return x.Attributes
+	}
+	return nil
+}
+
+func (x *Resource) GetDroppedAttributesCount() uint32 {
+	if x != nil {
+		return x.DroppedAttributesCount
+	}
+	return 0
+}
+
+// A collection of ScopeMetrics from a Resource.
+type ResourceMetrics struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// The resource for the metrics in this message.
+	// If this field is not set then no resource info is known.
+	Resource *Resource `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
+	// A list of metrics that originate from a resource.
+	ScopeMetrics []*ScopeMetrics `protobuf:"bytes,2,rep,name=scope_metrics,json=scopeMetrics,proto3" json:"scope_metrics,omitempty"`
+	// The Schema URL, if known. This is the identifier of the Schema that the resource data
+	// is recorded in. Notably, the last part of the URL path is the version number of the
+	// schema: http[s]://server[:port]/path/<version>. To learn more about Schema URL see
+	// https://opentelemetry.io/docs/specs/otel/schemas/#schema-url
+	// This schema_url applies to the data in the "resource" field. It does not apply
+	// to the data in the "scope_metrics" field which have their own schema_url field.
+	SchemaUrl string `protobuf:"bytes,3,opt,name=schema_url,json=schemaUrl,proto3" json:"schema_url,omitempty"`
+}
+
+func (x *ResourceMetrics) Reset() {
+	*x = ResourceMetrics{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_metric_server_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ResourceMetrics) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResourceMetrics) ProtoMessage() {}
+
+func (x *ResourceMetrics) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_metric_server_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResourceMetrics.ProtoReflect.Descriptor instead.
+func (*ResourceMetrics) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_metric_server_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ResourceMetrics) GetResource() *Resource {
+	if x != nil {
+		return x.Resource
+	}
+	return nil
+}
+
+func (x *ResourceMetrics) GetScopeMetrics() []*ScopeMetrics {
+	if x != nil {
+		return x.ScopeMetrics
+	}
+	return nil
+}
+
+func (x *ResourceMetrics) GetSchemaUrl() string {
+	if x != nil {
+		return x.SchemaUrl
+	}
+	return ""
+}
+
+type ExportMetricsServiceRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	EnterpriseUuid uint64 `protobuf:"varint,1,opt,name=enterprise_uuid,json=enterpriseUuid,proto3" json:"enterprise_uuid,omitempty"`
+	// An array of ResourceMetrics.
+	// For data coming from a single resource this array will typically contain one
+	// element. Intermediary nodes (such as OpenTelemetry Collector) that receive
+	// data from multiple origins typically batch the data before forwarding further and
+	// in that case this array will contain multiple elements.
+	ResourceMetrics []*ResourceMetrics `protobuf:"bytes,2,rep,name=resource_metrics,json=resourceMetrics,proto3" json:"resource_metrics,omitempty"`
+}
+
+func (x *ExportMetricsServiceRequest) Reset() {
+	*x = ExportMetricsServiceRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_metric_server_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ExportMetricsServiceRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExportMetricsServiceRequest) ProtoMessage() {}
+
+func (x *ExportMetricsServiceRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_metric_server_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExportMetricsServiceRequest.ProtoReflect.Descriptor instead.
+func (*ExportMetricsServiceRequest) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_metric_server_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ExportMetricsServiceRequest) GetEnterpriseUuid() uint64 {
+	if x != nil {
+		return x.EnterpriseUuid
+	}
+	return 0
+}
+
+func (x *ExportMetricsServiceRequest) GetResourceMetrics() []*ResourceMetrics {
+	if x != nil {
+		return x.ResourceMetrics
+	}
+	return nil
+}
+
 var File_manifest_protobuf_metric_server_proto protoreflect.FileDescriptor
 
 var file_manifest_protobuf_metric_server_proto_rawDesc = []byte{
 	0x0a, 0x25, 0x6d, 0x61, 0x6e, 0x69, 0x66, 0x65, 0x73, 0x74, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x62, 0x75, 0x66, 0x2f, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x65,
 	0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x0e, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2e,
-	0x67, 0x72, 0x70, 0x63, 0x2e, 0x76, 0x31, 0x22, 0x28, 0x0a, 0x0a, 0x44, 0x65, 0x76, 0x69, 0x63,
-	0x65, 0x44, 0x61, 0x74, 0x61, 0x12, 0x1a, 0x0a, 0x08, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x49,
-	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x49,
-	0x64, 0x22, 0x1d, 0x0a, 0x07, 0x4e, 0x6f, 0x64, 0x65, 0x52, 0x65, 0x73, 0x12, 0x12, 0x0a, 0x04,
-	0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65,
-	0x32, 0x5f, 0x0a, 0x13, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74,
-	0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x48, 0x0a, 0x0f, 0x52, 0x65, 0x70, 0x6f, 0x72,
-	0x74, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x69, 0x6e, 0x65, 0x72, 0x12, 0x1a, 0x2e, 0x6d, 0x65, 0x74,
-	0x72, 0x69, 0x63, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x65, 0x76, 0x69,
-	0x63, 0x65, 0x44, 0x61, 0x74, 0x61, 0x1a, 0x17, 0x2e, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2e,
+	0x67, 0x72, 0x70, 0x63, 0x2e, 0x76, 0x31, 0x22, 0xc2, 0x02, 0x0a, 0x08, 0x41, 0x6e, 0x79, 0x56,
+	0x61, 0x6c, 0x75, 0x65, 0x12, 0x23, 0x0a, 0x0c, 0x73, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x5f, 0x76,
+	0x61, 0x6c, 0x75, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x0b, 0x73, 0x74,
+	0x72, 0x69, 0x6e, 0x67, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x1f, 0x0a, 0x0a, 0x62, 0x6f, 0x6f,
+	0x6c, 0x5f, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x08, 0x48, 0x00, 0x52,
+	0x09, 0x62, 0x6f, 0x6f, 0x6c, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x1d, 0x0a, 0x09, 0x69, 0x6e,
+	0x74, 0x5f, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x48, 0x00, 0x52,
+	0x08, 0x69, 0x6e, 0x74, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x23, 0x0a, 0x0c, 0x64, 0x6f, 0x75,
+	0x62, 0x6c, 0x65, 0x5f, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x01, 0x48,
+	0x00, 0x52, 0x0b, 0x64, 0x6f, 0x75, 0x62, 0x6c, 0x65, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x3d,
+	0x0a, 0x0b, 0x61, 0x72, 0x72, 0x61, 0x79, 0x5f, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x05, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2e, 0x67, 0x72, 0x70,
+	0x63, 0x2e, 0x76, 0x31, 0x2e, 0x41, 0x72, 0x72, 0x61, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x48,
+	0x00, 0x52, 0x0a, 0x61, 0x72, 0x72, 0x61, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x41, 0x0a,
+	0x0c, 0x6b, 0x76, 0x6c, 0x69, 0x73, 0x74, 0x5f, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x06, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2e, 0x67, 0x72, 0x70,
+	0x63, 0x2e, 0x76, 0x31, 0x2e, 0x4b, 0x65, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x4c, 0x69, 0x73,
+	0x74, 0x48, 0x00, 0x52, 0x0b, 0x6b, 0x76, 0x6c, 0x69, 0x73, 0x74, 0x56, 0x61, 0x6c, 0x75, 0x65,
+	0x12, 0x21, 0x0a, 0x0b, 0x62, 0x79, 0x74, 0x65, 0x73, 0x5f, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18,
+	0x07, 0x20, 0x01, 0x28, 0x0c, 0x48, 0x00, 0x52, 0x0a, 0x62, 0x79, 0x74, 0x65, 0x73, 0x56, 0x61,
+	0x6c, 0x75, 0x65, 0x42, 0x07, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x40, 0x0a, 0x0c,
+	0x4b, 0x65, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x30, 0x0a, 0x06,
+	0x76, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x6d,
+	0x65, 0x74, 0x72, 0x69, 0x63, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x76, 0x31, 0x2e, 0x4b, 0x65,
+	0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52, 0x06, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x22, 0x3e,
+	0x0a, 0x0a, 0x41, 0x72, 0x72, 0x61, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x30, 0x0a, 0x06,
+	0x76, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x6d,
+	0x65, 0x74, 0x72, 0x69, 0x63, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x76, 0x31, 0x2e, 0x41, 0x6e,
+	0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52, 0x06, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x22, 0x3a,
+	0x0a, 0x08, 0x4b, 0x65, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x2e, 0x0a, 0x05, 0x76, 0x61,
+	0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x6d, 0x65, 0x74, 0x72,
+	0x69, 0x63, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x76, 0x31, 0x2e, 0x41, 0x6e, 0x79, 0x56, 0x61,
+	0x6c, 0x75, 0x65, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x23, 0x0a, 0x07, 0x4e, 0x6f,
+	0x64, 0x65, 0x52, 0x65, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x4a, 0x04, 0x08, 0x0a, 0x10, 0x0b, 0x22,
+	0x9c, 0x02, 0x0a, 0x0c, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x4d, 0x65, 0x74, 0x72, 0x69, 0x63,
+	0x12, 0x1a, 0x0a, 0x08, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x05, 0x52, 0x08, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x49, 0x64, 0x12, 0x1e, 0x0a, 0x0a,
+	0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x49, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04,
+	0x52, 0x0a, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x49, 0x64, 0x12, 0x38, 0x0a, 0x0a,
+	0x61, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b,
+	0x32, 0x18, 0x2e, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x76,
+	0x31, 0x2e, 0x4b, 0x65, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52, 0x0a, 0x61, 0x74, 0x74, 0x72,
+	0x69, 0x62, 0x75, 0x74, 0x65, 0x73, 0x12, 0x2f, 0x0a, 0x14, 0x73, 0x74, 0x61, 0x72, 0x74, 0x5f,
+	0x74, 0x69, 0x6d, 0x65, 0x5f, 0x75, 0x6e, 0x69, 0x78, 0x5f, 0x6e, 0x61, 0x6e, 0x6f, 0x18, 0x04,
+	0x20, 0x01, 0x28, 0x06, 0x52, 0x11, 0x73, 0x74, 0x61, 0x72, 0x74, 0x54, 0x69, 0x6d, 0x65, 0x55,
+	0x6e, 0x69, 0x78, 0x4e, 0x61, 0x6e, 0x6f, 0x12, 0x24, 0x0a, 0x0e, 0x74, 0x69, 0x6d, 0x65, 0x5f,
+	0x75, 0x6e, 0x69, 0x78, 0x5f, 0x6e, 0x61, 0x6e, 0x6f, 0x18, 0x05, 0x20, 0x01, 0x28, 0x06, 0x52,
+	0x0c, 0x74, 0x69, 0x6d, 0x65, 0x55, 0x6e, 0x69, 0x78, 0x4e, 0x61, 0x6e, 0x6f, 0x12, 0x1d, 0x0a,
+	0x09, 0x61, 0x73, 0x5f, 0x64, 0x6f, 0x75, 0x62, 0x6c, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x01,
+	0x48, 0x00, 0x52, 0x08, 0x61, 0x73, 0x44, 0x6f, 0x75, 0x62, 0x6c, 0x65, 0x12, 0x17, 0x0a, 0x06,
+	0x61, 0x73, 0x5f, 0x69, 0x6e, 0x74, 0x18, 0x07, 0x20, 0x01, 0x28, 0x10, 0x48, 0x00, 0x52, 0x05,
+	0x61, 0x73, 0x49, 0x6e, 0x74, 0x42, 0x07, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x65,
+	0x0a, 0x0c, 0x53, 0x63, 0x6f, 0x70, 0x65, 0x4d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x12, 0x36,
+	0x0a, 0x07, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32,
+	0x1c, 0x2e, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x76, 0x31,
+	0x2e, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x4d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x52, 0x07, 0x6d,
+	0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61,
+	0x5f, 0x75, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x63, 0x68, 0x65,
+	0x6d, 0x61, 0x55, 0x72, 0x6c, 0x22, 0x7e, 0x0a, 0x08, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63,
+	0x65, 0x12, 0x38, 0x0a, 0x0a, 0x61, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x73, 0x18,
+	0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2e, 0x67,
+	0x72, 0x70, 0x63, 0x2e, 0x76, 0x31, 0x2e, 0x4b, 0x65, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52,
+	0x0a, 0x61, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x73, 0x12, 0x38, 0x0a, 0x18, 0x64,
+	0x72, 0x6f, 0x70, 0x70, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65,
+	0x73, 0x5f, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x16, 0x64,
+	0x72, 0x6f, 0x70, 0x70, 0x65, 0x64, 0x41, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x73,
+	0x43, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0xb1, 0x01, 0x0a, 0x0f, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72,
+	0x63, 0x65, 0x4d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x12, 0x34, 0x0a, 0x08, 0x72, 0x65, 0x73,
+	0x6f, 0x75, 0x72, 0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x6d, 0x65,
+	0x74, 0x72, 0x69, 0x63, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x73,
+	0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x08, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x12,
+	0x41, 0x0a, 0x0d, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x5f, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x73,
+	0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2e,
+	0x67, 0x72, 0x70, 0x63, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x63, 0x6f, 0x70, 0x65, 0x4d, 0x65, 0x74,
+	0x72, 0x69, 0x63, 0x73, 0x52, 0x0c, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x4d, 0x65, 0x74, 0x72, 0x69,
+	0x63, 0x73, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x5f, 0x75, 0x72, 0x6c,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x63, 0x68, 0x65, 0x6d, 0x61, 0x55, 0x72,
+	0x6c, 0x4a, 0x06, 0x08, 0xe8, 0x07, 0x10, 0xe9, 0x07, 0x22, 0x92, 0x01, 0x0a, 0x1b, 0x45, 0x78,
+	0x70, 0x6f, 0x72, 0x74, 0x4d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x53, 0x65, 0x72, 0x76, 0x69,
+	0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x27, 0x0a, 0x0f, 0x65, 0x6e, 0x74,
+	0x65, 0x72, 0x70, 0x72, 0x69, 0x73, 0x65, 0x5f, 0x75, 0x75, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x04, 0x52, 0x0e, 0x65, 0x6e, 0x74, 0x65, 0x72, 0x70, 0x72, 0x69, 0x73, 0x65, 0x55, 0x75,
+	0x69, 0x64, 0x12, 0x4a, 0x0a, 0x10, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x6d,
+	0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x6d,
+	0x65, 0x74, 0x72, 0x69, 0x63, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65,
+	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x4d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x52, 0x0f, 0x72,
+	0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x4d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x32, 0x71,
+	0x0a, 0x13, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x53, 0x65,
+	0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x5a, 0x0a, 0x10, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x44,
+	0x65, 0x76, 0x69, 0x63, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x2b, 0x2e, 0x6d, 0x65, 0x74, 0x72,
+	0x69, 0x63, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x70, 0x6f, 0x72,
+	0x74, 0x4d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2e,
 	0x67, 0x72, 0x70, 0x63, 0x2e, 0x76, 0x31, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x52, 0x65, 0x73, 0x22,
 	0x00, 0x42, 0x10, 0x5a, 0x0e, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x2f, 0x67, 0x72, 0x70, 0x63,
 	0x2f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
@@ -147,19 +889,38 @@ func file_manifest_protobuf_metric_server_proto_rawDescGZIP() []byte {
 	return file_manifest_protobuf_metric_server_proto_rawDescData
 }
 
-var file_manifest_protobuf_metric_server_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_manifest_protobuf_metric_server_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_manifest_protobuf_metric_server_proto_goTypes = []interface{}{
-	(*DeviceData)(nil), // 0: metric.grpc.v1.DeviceData
-	(*NodeRes)(nil),    // 1: metric.grpc.v1.NodeRes
+	(*AnyValue)(nil),                    // 0: metric.grpc.v1.AnyValue
+	(*KeyValueList)(nil),                // 1: metric.grpc.v1.KeyValueList
+	(*ArrayValue)(nil),                  // 2: metric.grpc.v1.ArrayValue
+	(*KeyValue)(nil),                    // 3: metric.grpc.v1.KeyValue
+	(*NodeRes)(nil),                     // 4: metric.grpc.v1.NodeRes
+	(*DeviceMetric)(nil),                // 5: metric.grpc.v1.DeviceMetric
+	(*ScopeMetrics)(nil),                // 6: metric.grpc.v1.ScopeMetrics
+	(*Resource)(nil),                    // 7: metric.grpc.v1.Resource
+	(*ResourceMetrics)(nil),             // 8: metric.grpc.v1.ResourceMetrics
+	(*ExportMetricsServiceRequest)(nil), // 9: metric.grpc.v1.ExportMetricsServiceRequest
 }
 var file_manifest_protobuf_metric_server_proto_depIdxs = []int32{
-	0, // 0: metric.grpc.v1.DeviceReportService.ReportContainer:input_type -> metric.grpc.v1.DeviceData
-	1, // 1: metric.grpc.v1.DeviceReportService.ReportContainer:output_type -> metric.grpc.v1.NodeRes
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2,  // 0: metric.grpc.v1.AnyValue.array_value:type_name -> metric.grpc.v1.ArrayValue
+	1,  // 1: metric.grpc.v1.AnyValue.kvlist_value:type_name -> metric.grpc.v1.KeyValueList
+	3,  // 2: metric.grpc.v1.KeyValueList.values:type_name -> metric.grpc.v1.KeyValue
+	0,  // 3: metric.grpc.v1.ArrayValue.values:type_name -> metric.grpc.v1.AnyValue
+	0,  // 4: metric.grpc.v1.KeyValue.value:type_name -> metric.grpc.v1.AnyValue
+	3,  // 5: metric.grpc.v1.DeviceMetric.attributes:type_name -> metric.grpc.v1.KeyValue
+	5,  // 6: metric.grpc.v1.ScopeMetrics.metrics:type_name -> metric.grpc.v1.DeviceMetric
+	3,  // 7: metric.grpc.v1.Resource.attributes:type_name -> metric.grpc.v1.KeyValue
+	7,  // 8: metric.grpc.v1.ResourceMetrics.resource:type_name -> metric.grpc.v1.Resource
+	6,  // 9: metric.grpc.v1.ResourceMetrics.scope_metrics:type_name -> metric.grpc.v1.ScopeMetrics
+	8,  // 10: metric.grpc.v1.ExportMetricsServiceRequest.resource_metrics:type_name -> metric.grpc.v1.ResourceMetrics
+	9,  // 11: metric.grpc.v1.DeviceReportService.ReportDeviceInfo:input_type -> metric.grpc.v1.ExportMetricsServiceRequest
+	4,  // 12: metric.grpc.v1.DeviceReportService.ReportDeviceInfo:output_type -> metric.grpc.v1.NodeRes
+	12, // [12:13] is the sub-list for method output_type
+	11, // [11:12] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_manifest_protobuf_metric_server_proto_init() }
@@ -169,7 +930,7 @@ func file_manifest_protobuf_metric_server_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_manifest_protobuf_metric_server_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeviceData); i {
+			switch v := v.(*AnyValue); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -181,6 +942,42 @@ func file_manifest_protobuf_metric_server_proto_init() {
 			}
 		}
 		file_manifest_protobuf_metric_server_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*KeyValueList); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_manifest_protobuf_metric_server_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ArrayValue); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_manifest_protobuf_metric_server_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*KeyValue); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_manifest_protobuf_metric_server_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*NodeRes); i {
 			case 0:
 				return &v.state
@@ -192,6 +989,79 @@ func file_manifest_protobuf_metric_server_proto_init() {
 				return nil
 			}
 		}
+		file_manifest_protobuf_metric_server_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DeviceMetric); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_manifest_protobuf_metric_server_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ScopeMetrics); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_manifest_protobuf_metric_server_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Resource); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_manifest_protobuf_metric_server_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ResourceMetrics); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_manifest_protobuf_metric_server_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ExportMetricsServiceRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+	}
+	file_manifest_protobuf_metric_server_proto_msgTypes[0].OneofWrappers = []interface{}{
+		(*AnyValue_StringValue)(nil),
+		(*AnyValue_BoolValue)(nil),
+		(*AnyValue_IntValue)(nil),
+		(*AnyValue_DoubleValue)(nil),
+		(*AnyValue_ArrayValue)(nil),
+		(*AnyValue_KvlistValue)(nil),
+		(*AnyValue_BytesValue)(nil),
+	}
+	file_manifest_protobuf_metric_server_proto_msgTypes[5].OneofWrappers = []interface{}{
+		(*DeviceMetric_AsDouble)(nil),
+		(*DeviceMetric_AsInt)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -199,7 +1069,7 @@ func file_manifest_protobuf_metric_server_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_manifest_protobuf_metric_server_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
