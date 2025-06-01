@@ -134,12 +134,13 @@ message ResourceMetrics {
 
 message ExportMetricsServiceRequest {
   uint64 enterprise_uuid = 1;
+  uint64 series_id = 2;
   // An array of ResourceMetrics.
   // For data coming from a single resource this array will typically contain one
   // element. Intermediary nodes (such as OpenTelemetry Collector) that receive
   // data from multiple origins typically batch the data before forwarding further and
   // in that case this array will contain multiple elements.
-  repeated ResourceMetrics resource_metrics = 2;
+  repeated ResourceMetrics resource_metrics = 3;
 }
 
 service DeviceReportService {
