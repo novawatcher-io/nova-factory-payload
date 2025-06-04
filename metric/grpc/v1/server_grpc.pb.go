@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.1
-// source: manifest/protobuf/metric/server.proto
+// source: manifest/protobuf/metric/v1/server.proto
 
 package v1
 
@@ -107,5 +107,5 @@ var DeviceReportService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "manifest/protobuf/metric/server.proto",
+	Metadata: "manifest/protobuf/metric/v1/server.proto",
 }
