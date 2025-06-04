@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package daemonize.grpc.v1;
+option go_package = "daemonize/grpc/v1";
+
+import "google/protobuf/timestamp.proto";
+
+service AgentControllerService {
+  // 注册 agent
+  rpc AgentRegister(AgentRegisterReq) returns (AgentRegisterRes) {}
+  // 注销 agent
+  rpc AgentUnregister(AgentUnregisterReq) returns (AgentUnregisterRes) {}
+  // agent 心跳
+  rpc AgentHeartbeat(AgentHeartbeatReq) returns (AgentHeartbeatRes) {}
+  // 操作agent stream长连接
+  rpc AgentOperate(AgentOperateReq) returns (stream AgentOperateRes) {}
+  // 获取配置
+  rpc AgentGetConfig(AgentGetConfigReq) returns (AgentGetConfigRes) {}
+  // 操作agent的子进程 广播使用
+  rpc AgentOperateProcess(AgentOperateProcessReq) returns (AgentOperateProcessRes) {}
+}
+
+message AgentOperateReq {
+  uint64 ObjectId = 1;
+}
+
+message AgentOperateRes {
+  int32 Code = 1;                         // 返回码
+  // 操作进程
+  AgentCmd Cmd = 2;
+  repeated string Names = 3;
+}
+
+message AgentRegisterReq {
+  uint64 ObjectId = 1;
+  string Name = 2;
+  string Version = 3;
+  string ipv4 = 4; // 主机的内网IPv4地址
+  string ipv6 = 5; // 主机的内网IPv6地址
+}
+message AgentRegisterRes {
+  string ConfigUuid = 1;
+}
+
+message AgentUnregisterReq {
+  uint64 ObjectId = 1;
+}
+message AgentUnregisterRes {
+
+}
+
+message AgentProcessInfo {
+  repeated ProcessInfo ProcessList = 5;  // 进程列表
+}
+
+message ProcessInfo {
+  string Name = 1;                                // 进程名字
+  ProcessState State = 2;                         // 进程状态
+  string Version = 3;                             // 进程版本号
+  google.protobuf.Timestamp StartTime = 4;        // 启动时间
+}
+
+message AgentHeartbeatReq {
+  uint64 ObjectId = 1;                        // agent 的id
+  string Name = 2;                            // agent 的名字
+  string Version = 3;                         // agent 的版本
+  string ConfigUuid = 4;                      // agent 的配置版本
+  AgentProcessInfo AgentProcessInfo = 5;      // 进程列表
+}
+message AgentHeartbeatRes {
+  // 配置uuid
+  string ConfigUuid = 3;
+}
+
+message AgentGetConfigReq {
+  string ConfigUuid = 1;
+}
+message AgentGetConfigRes {
+  string Content = 1;
+}
+
+message AgentUpdateConfigReq {
+  repeated uint64 ObjectIdList = 1;
+  string ConfigUuid = 2;
+}
+
+message AgentUpdateConfigRes {
+}
+
+message ProcessOperateInfo {
+  uint64 AgentObjectId = 1;
+  repeated string Names = 2;
+}
+
+message AgentOperateProcessReq {
+  AgentCmd cmd = 1;
+  repeated ProcessOperateInfo OperateInfoList = 2;
+}
+
+message AgentOperateProcessRes {
+}
+
+enum AgentCmd {
+  NoneCmd = 0;
+  Start = 1;
+  Stop = 2;
+}
+
+enum ProcessState {
+  NoneState = 0;
+  Running = 1;
+  Stopped = 2;
+}
