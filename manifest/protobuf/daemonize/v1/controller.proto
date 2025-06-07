@@ -107,7 +107,12 @@ enum AgentCmd {
 }
 
 enum ProcessState {
-  NoneState = 0;
-  Running = 1;
-  Stopped = 2;
+  INITIAL = 0;
+  STARTING = 1;
+  RUNNING = 2;
+  STOPPING = 3;
+  INTERRUPT = 4;
+  FINISHED = 5;
+  FATAL = 6;
+  UNKNOWN = 7;
 }
