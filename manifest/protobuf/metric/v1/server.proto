@@ -55,7 +55,7 @@ message NodeRes {
 }
 
 message DeviceMetric {
-  int32 deviceId = 1;
+  uint64 deviceId = 1;
   uint64 templateId = 2;
   // The set of key/value pairs that uniquely identify the timeseries from
   // where this point belongs. The list may be empty (may contain 0 elements).
