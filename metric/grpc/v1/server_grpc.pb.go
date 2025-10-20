@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	DeviceReportService_ReportDeviceInfo_FullMethodName = "/metric.grpc.v1.DeviceReportService/ReportDeviceInfo"
+	DeviceReportService_ReportTimeData_FullMethodName   = "/metric.grpc.v1.DeviceReportService/ReportTimeData"
 )
 
 // DeviceReportServiceClient is the client API for DeviceReportService service.
@@ -28,6 +29,8 @@ const (
 type DeviceReportServiceClient interface {
 	// 更新容器信息
 	ReportDeviceInfo(ctx context.Context, in *ExportMetricsServiceRequest, opts ...grpc.CallOption) (*NodeRes, error)
+	// 更新时序数据
+	ReportTimeData(ctx context.Context, in *ExportTimeDataRequest, opts ...grpc.CallOption) (*NodeRes, error)
 }
 
 type deviceReportServiceClient struct {
@@ -47,12 +50,23 @@ func (c *deviceReportServiceClient) ReportDeviceInfo(ctx context.Context, in *Ex
 	return out, nil
 }
 
+func (c *deviceReportServiceClient) ReportTimeData(ctx context.Context, in *ExportTimeDataRequest, opts ...grpc.CallOption) (*NodeRes, error) {
+	out := new(NodeRes)
+	err := c.cc.Invoke(ctx, DeviceReportService_ReportTimeData_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DeviceReportServiceServer is the server API for DeviceReportService service.
 // All implementations must embed UnimplementedDeviceReportServiceServer
 // for forward compatibility
 type DeviceReportServiceServer interface {
 	// 更新容器信息
 	ReportDeviceInfo(context.Context, *ExportMetricsServiceRequest) (*NodeRes, error)
+	// 更新时序数据
+	ReportTimeData(context.Context, *ExportTimeDataRequest) (*NodeRes, error)
 	mustEmbedUnimplementedDeviceReportServiceServer()
 }
 
@@ -62,6 +76,9 @@ type UnimplementedDeviceReportServiceServer struct {
 
 func (UnimplementedDeviceReportServiceServer) ReportDeviceInfo(context.Context, *ExportMetricsServiceRequest) (*NodeRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportDeviceInfo not implemented")
+}
+func (UnimplementedDeviceReportServiceServer) ReportTimeData(context.Context, *ExportTimeDataRequest) (*NodeRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReportTimeData not implemented")
 }
 func (UnimplementedDeviceReportServiceServer) mustEmbedUnimplementedDeviceReportServiceServer() {}
 
@@ -94,6 +111,24 @@ func _DeviceReportService_ReportDeviceInfo_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeviceReportService_ReportTimeData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExportTimeDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeviceReportServiceServer).ReportTimeData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeviceReportService_ReportTimeData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeviceReportServiceServer).ReportTimeData(ctx, req.(*ExportTimeDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DeviceReportService_ServiceDesc is the grpc.ServiceDesc for DeviceReportService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -104,6 +139,10 @@ var DeviceReportService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReportDeviceInfo",
 			Handler:    _DeviceReportService_ReportDeviceInfo_Handler,
+		},
+		{
+			MethodName: "ReportTimeData",
+			Handler:    _DeviceReportService_ReportTimeData_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

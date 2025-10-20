@@ -144,7 +144,49 @@ message ExportMetricsServiceRequest {
   repeated ResourceMetrics resource_metrics = 3;
 }
 
+message TimeDataMetric {
+  string field = 1;
+
+  // The value itself.  A point is considered invalid when one of the recognized
+  // value fields is not present inside this oneof.
+  oneof value {
+    double as_double = 2;
+    sfixed64 as_int = 3;
+  }
+}
+
+
+message ResourceTimeMetrics {
+  // 数据表名字
+  string table = 1;
+  // 数据字段名字
+  repeated TimeDataMetric metrics = 2;
+  // StartTimeUnixNano is optional but strongly encouraged, see the
+  // the detailed comments above Metric.
+  //
+  // Value is UNIX Epoch time in nanoseconds since 00:00:00 UTC on 1 January
+  // 1970.
+  fixed64 start_time_unix_nano = 4;
+
+  // TimeUnixNano is required, see the detailed comments above Metric.
+  //
+  // Value is UNIX Epoch time in nanoseconds since 00:00:00 UTC on 1 January
+  // 1970.
+  fixed64 time_unix_nano = 5;
+}
+
+message ExportTimeDataRequest {
+  // An array of ResourceMetrics.
+  // For data coming from a single resource this array will typically contain one
+  // element. Intermediary nodes (such as OpenTelemetry Collector) that receive
+  // data from multiple origins typically batch the data before forwarding further and
+  // in that case this array will contain multiple elements.
+  repeated ResourceTimeMetrics resource_metrics = 3;
+}
+
 service DeviceReportService {
   // 更新容器信息
   rpc ReportDeviceInfo(ExportMetricsServiceRequest) returns (NodeRes) {}
+  // 更新时序数据
+  rpc ReportTimeData(ExportTimeDataRequest) returns (NodeRes) {}
 }
