@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	DeviceReportService_ReportDeviceInfo_FullMethodName = "/metric.grpc.v1.DeviceReportService/ReportDeviceInfo"
-	DeviceReportService_ReportTimeData_FullMethodName   = "/metric.grpc.v1.DeviceReportService/ReportTimeData"
+	DeviceReportService_ReportDeviceInfo_FullMethodName  = "/metric.grpc.v1.DeviceReportService/ReportDeviceInfo"
+	DeviceReportService_ReportTimeData_FullMethodName    = "/metric.grpc.v1.DeviceReportService/ReportTimeData"
+	DeviceReportService_ReportScheduleLog_FullMethodName = "/metric.grpc.v1.DeviceReportService/ReportScheduleLog"
 )
 
 // DeviceReportServiceClient is the client API for DeviceReportService service.
@@ -31,6 +32,8 @@ type DeviceReportServiceClient interface {
 	ReportDeviceInfo(ctx context.Context, in *ExportMetricsServiceRequest, opts ...grpc.CallOption) (*NodeRes, error)
 	// 更新时序数据
 	ReportTimeData(ctx context.Context, in *ExportTimeDataRequest, opts ...grpc.CallOption) (*NodeRes, error)
+	// 更新控制日志
+	ReportScheduleLog(ctx context.Context, in *ExportControlLogRequest, opts ...grpc.CallOption) (*NodeRes, error)
 }
 
 type deviceReportServiceClient struct {
@@ -59,6 +62,15 @@ func (c *deviceReportServiceClient) ReportTimeData(ctx context.Context, in *Expo
 	return out, nil
 }
 
+func (c *deviceReportServiceClient) ReportScheduleLog(ctx context.Context, in *ExportControlLogRequest, opts ...grpc.CallOption) (*NodeRes, error) {
+	out := new(NodeRes)
+	err := c.cc.Invoke(ctx, DeviceReportService_ReportScheduleLog_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DeviceReportServiceServer is the server API for DeviceReportService service.
 // All implementations must embed UnimplementedDeviceReportServiceServer
 // for forward compatibility
@@ -67,6 +79,8 @@ type DeviceReportServiceServer interface {
 	ReportDeviceInfo(context.Context, *ExportMetricsServiceRequest) (*NodeRes, error)
 	// 更新时序数据
 	ReportTimeData(context.Context, *ExportTimeDataRequest) (*NodeRes, error)
+	// 更新控制日志
+	ReportScheduleLog(context.Context, *ExportControlLogRequest) (*NodeRes, error)
 	mustEmbedUnimplementedDeviceReportServiceServer()
 }
 
@@ -79,6 +93,9 @@ func (UnimplementedDeviceReportServiceServer) ReportDeviceInfo(context.Context, 
 }
 func (UnimplementedDeviceReportServiceServer) ReportTimeData(context.Context, *ExportTimeDataRequest) (*NodeRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportTimeData not implemented")
+}
+func (UnimplementedDeviceReportServiceServer) ReportScheduleLog(context.Context, *ExportControlLogRequest) (*NodeRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReportScheduleLog not implemented")
 }
 func (UnimplementedDeviceReportServiceServer) mustEmbedUnimplementedDeviceReportServiceServer() {}
 
@@ -129,6 +146,24 @@ func _DeviceReportService_ReportTimeData_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeviceReportService_ReportScheduleLog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExportControlLogRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeviceReportServiceServer).ReportScheduleLog(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeviceReportService_ReportScheduleLog_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeviceReportServiceServer).ReportScheduleLog(ctx, req.(*ExportControlLogRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DeviceReportService_ServiceDesc is the grpc.ServiceDesc for DeviceReportService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -143,6 +178,10 @@ var DeviceReportService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReportTimeData",
 			Handler:    _DeviceReportService_ReportTimeData_Handler,
+		},
+		{
+			MethodName: "ReportScheduleLog",
+			Handler:    _DeviceReportService_ReportScheduleLog_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
