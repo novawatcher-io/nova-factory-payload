@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package control.v1;
+
+option go_package = "control/v1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
+// ControlService provides interfaces for real-time device control.
+service ControlService {
+  // Bidirectional stream for real-time control and feedback.
+  rpc ControlStream(stream ControlRequest) returns (stream ControlResponse) {}
+
+  // Unary call for single control operations.
+  rpc Control(ControlRequest) returns (ControlResponse) {}
+}
+
+// Unified request for device control.
+message ControlRequest {
+  string request_id = 1;      // Unique identifier for tracking (UUID).
+  uint64 device_id = 2;       // Target device identifier.
+  uint64 agent_id = 3;        // Target agent identifier.
+  uint64 data_id = 4;        // Target agent identifier.
+  
+  CommandType command = 5;    // Action to perform.
+  
+  google.protobuf.Timestamp timestamp = 10; // Request timestamp.
+  Value value = 11;                         // Control value (for write/execute).
+}
+
+enum ValueType {
+  VALUE_TYPE_UNSPECIFIED = 0;
+  VALUE_TYPE_STRING = 1;
+  VALUE_TYPE_BOOL = 2;
+  VALUE_TYPE_INT64 = 3;
+  VALUE_TYPE_UINT64 = 4;
+  VALUE_TYPE_DOUBLE = 5;
+  VALUE_TYPE_FLOAT = 6;
+  VALUE_TYPE_ARRAY = 7;
+  VALUE_TYPE_KVLIST = 8;
+  VALUE_TYPE_BYTES = 9;
+  VALUE_TYPE_NULL = 10;
+}
+
+// Value is used to represent any type of attribute or control value.
+message Value {
+  ValueType type = 1;         // Explicit type for quick identification.
+  
+  oneof value {
+    string string_value = 2;
+    bool bool_value = 3;
+    int64 int_value = 4;
+    uint64 uint_value = 5;
+    double double_value = 6;
+    float float_value = 7;
+    ArrayValue array_value = 8;
+    KeyValueList kvlist_value = 9;
+    bytes bytes_value = 10;
+    bool null_value = 11;
+  }
+}
+
+message KeyValueList {
+  repeated KeyValue values = 1;
+}
+
+message ArrayValue {
+  repeated Value values = 1;
+}
+
+message KeyValue {
+  string key = 1;
+  Value value = 2;
+}
+
+// Unified response for device control.
+message ControlResponse {
+  string request_id = 1;      // Links back to the request_id.
+  bool success = 2;           // Whether the operation was successful.
+  int32 status_code = 3;      // Protocol or application specific status code.
+  string message = 4;         // Error message or status description.
+  
+  google.protobuf.Any data = 5; // Result data.
+  
+  google.protobuf.Timestamp timestamp = 6; // Response timestamp.
+}
+
+enum CommandType {
+  READ = 0;
+  WRITE = 1;
+  EXECUTE = 2;
+  SUBSCRIBE = 3;
+  UNSUBSCRIBE = 4;
+}
