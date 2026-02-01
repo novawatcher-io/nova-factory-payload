@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v3.21.12
-// source: control/v1/control.proto
+// source: manifest/protobuf/control/v1/control.proto
 
 package v1
 
@@ -19,8 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	ControlService_ControlStream_FullMethodName = "/control.v1.ControlService/ControlStream"
-	ControlService_Control_FullMethodName       = "/control.v1.ControlService/Control"
+	ControlService_ControlStream_FullMethodName    = "/control.v1.ControlService/ControlStream"
+	ControlService_BroadcastControl_FullMethodName = "/control.v1.ControlService/BroadcastControl"
+	ControlService_Register_FullMethodName         = "/control.v1.ControlService/Register"
+	ControlService_Unregister_FullMethodName       = "/control.v1.ControlService/Unregister"
+	ControlService_Heartbeat_FullMethodName        = "/control.v1.ControlService/Heartbeat"
+	ControlService_Operate_FullMethodName          = "/control.v1.ControlService/Operate"
 )
 
 // ControlServiceClient is the client API for ControlService service.
@@ -30,7 +34,15 @@ type ControlServiceClient interface {
 	// Bidirectional stream for real-time control and feedback.
 	ControlStream(ctx context.Context, opts ...grpc.CallOption) (ControlService_ControlStreamClient, error)
 	// Unary call for single control operations.
-	Control(ctx context.Context, in *ControlRequest, opts ...grpc.CallOption) (*ControlResponse, error)
+	BroadcastControl(ctx context.Context, in *ControlRequest, opts ...grpc.CallOption) (*ControlResponse, error)
+	// 注册 agent
+	Register(ctx context.Context, in *RegisterReq, opts ...grpc.CallOption) (*RegisterRes, error)
+	// 注销 agent
+	Unregister(ctx context.Context, in *UnregisterReq, opts ...grpc.CallOption) (*UnregisterRes, error)
+	// agent 心跳
+	Heartbeat(ctx context.Context, in *HeartbeatReq, opts ...grpc.CallOption) (*HeartbeatRes, error)
+	// 操作agent stream长连接
+	Operate(ctx context.Context, in *OperateReq, opts ...grpc.CallOption) (ControlService_OperateClient, error)
 }
 
 type controlServiceClient struct {
@@ -72,13 +84,72 @@ func (x *controlServiceControlStreamClient) Recv() (*ControlResponse, error) {
 	return m, nil
 }
 
-func (c *controlServiceClient) Control(ctx context.Context, in *ControlRequest, opts ...grpc.CallOption) (*ControlResponse, error) {
+func (c *controlServiceClient) BroadcastControl(ctx context.Context, in *ControlRequest, opts ...grpc.CallOption) (*ControlResponse, error) {
 	out := new(ControlResponse)
-	err := c.cc.Invoke(ctx, ControlService_Control_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ControlService_BroadcastControl_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+func (c *controlServiceClient) Register(ctx context.Context, in *RegisterReq, opts ...grpc.CallOption) (*RegisterRes, error) {
+	out := new(RegisterRes)
+	err := c.cc.Invoke(ctx, ControlService_Register_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controlServiceClient) Unregister(ctx context.Context, in *UnregisterReq, opts ...grpc.CallOption) (*UnregisterRes, error) {
+	out := new(UnregisterRes)
+	err := c.cc.Invoke(ctx, ControlService_Unregister_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controlServiceClient) Heartbeat(ctx context.Context, in *HeartbeatReq, opts ...grpc.CallOption) (*HeartbeatRes, error) {
+	out := new(HeartbeatRes)
+	err := c.cc.Invoke(ctx, ControlService_Heartbeat_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controlServiceClient) Operate(ctx context.Context, in *OperateReq, opts ...grpc.CallOption) (ControlService_OperateClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ControlService_ServiceDesc.Streams[1], ControlService_Operate_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &controlServiceOperateClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ControlService_OperateClient interface {
+	Recv() (*OperateRes, error)
+	grpc.ClientStream
+}
+
+type controlServiceOperateClient struct {
+	grpc.ClientStream
+}
+
+func (x *controlServiceOperateClient) Recv() (*OperateRes, error) {
+	m := new(OperateRes)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // ControlServiceServer is the server API for ControlService service.
@@ -88,7 +159,15 @@ type ControlServiceServer interface {
 	// Bidirectional stream for real-time control and feedback.
 	ControlStream(ControlService_ControlStreamServer) error
 	// Unary call for single control operations.
-	Control(context.Context, *ControlRequest) (*ControlResponse, error)
+	BroadcastControl(context.Context, *ControlRequest) (*ControlResponse, error)
+	// 注册 agent
+	Register(context.Context, *RegisterReq) (*RegisterRes, error)
+	// 注销 agent
+	Unregister(context.Context, *UnregisterReq) (*UnregisterRes, error)
+	// agent 心跳
+	Heartbeat(context.Context, *HeartbeatReq) (*HeartbeatRes, error)
+	// 操作agent stream长连接
+	Operate(*OperateReq, ControlService_OperateServer) error
 	mustEmbedUnimplementedControlServiceServer()
 }
 
@@ -99,8 +178,20 @@ type UnimplementedControlServiceServer struct {
 func (UnimplementedControlServiceServer) ControlStream(ControlService_ControlStreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method ControlStream not implemented")
 }
-func (UnimplementedControlServiceServer) Control(context.Context, *ControlRequest) (*ControlResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Control not implemented")
+func (UnimplementedControlServiceServer) BroadcastControl(context.Context, *ControlRequest) (*ControlResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BroadcastControl not implemented")
+}
+func (UnimplementedControlServiceServer) Register(context.Context, *RegisterReq) (*RegisterRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedControlServiceServer) Unregister(context.Context, *UnregisterReq) (*UnregisterRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Unregister not implemented")
+}
+func (UnimplementedControlServiceServer) Heartbeat(context.Context, *HeartbeatReq) (*HeartbeatRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Heartbeat not implemented")
+}
+func (UnimplementedControlServiceServer) Operate(*OperateReq, ControlService_OperateServer) error {
+	return status.Errorf(codes.Unimplemented, "method Operate not implemented")
 }
 func (UnimplementedControlServiceServer) mustEmbedUnimplementedControlServiceServer() {}
 
@@ -141,22 +232,97 @@ func (x *controlServiceControlStreamServer) Recv() (*ControlRequest, error) {
 	return m, nil
 }
 
-func _ControlService_Control_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ControlService_BroadcastControl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ControlRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ControlServiceServer).Control(ctx, in)
+		return srv.(ControlServiceServer).BroadcastControl(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ControlService_Control_FullMethodName,
+		FullMethod: ControlService_BroadcastControl_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControlServiceServer).Control(ctx, req.(*ControlRequest))
+		return srv.(ControlServiceServer).BroadcastControl(ctx, req.(*ControlRequest))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _ControlService_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControlServiceServer).Register(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ControlService_Register_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControlServiceServer).Register(ctx, req.(*RegisterReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ControlService_Unregister_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnregisterReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControlServiceServer).Unregister(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ControlService_Unregister_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControlServiceServer).Unregister(ctx, req.(*UnregisterReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ControlService_Heartbeat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HeartbeatReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControlServiceServer).Heartbeat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ControlService_Heartbeat_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControlServiceServer).Heartbeat(ctx, req.(*HeartbeatReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ControlService_Operate_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(OperateReq)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ControlServiceServer).Operate(m, &controlServiceOperateServer{stream})
+}
+
+type ControlService_OperateServer interface {
+	Send(*OperateRes) error
+	grpc.ServerStream
+}
+
+type controlServiceOperateServer struct {
+	grpc.ServerStream
+}
+
+func (x *controlServiceOperateServer) Send(m *OperateRes) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 // ControlService_ServiceDesc is the grpc.ServiceDesc for ControlService service.
@@ -167,8 +333,20 @@ var ControlService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ControlServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Control",
-			Handler:    _ControlService_Control_Handler,
+			MethodName: "BroadcastControl",
+			Handler:    _ControlService_BroadcastControl_Handler,
+		},
+		{
+			MethodName: "Register",
+			Handler:    _ControlService_Register_Handler,
+		},
+		{
+			MethodName: "Unregister",
+			Handler:    _ControlService_Unregister_Handler,
+		},
+		{
+			MethodName: "Heartbeat",
+			Handler:    _ControlService_Heartbeat_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
@@ -178,6 +356,11 @@ var ControlService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 			ClientStreams: true,
 		},
+		{
+			StreamName:    "Operate",
+			Handler:       _ControlService_Operate_Handler,
+			ServerStreams: true,
+		},
 	},
-	Metadata: "control/v1/control.proto",
+	Metadata: "manifest/protobuf/control/v1/control.proto",
 }

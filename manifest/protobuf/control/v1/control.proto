@@ -13,7 +13,16 @@ service ControlService {
   rpc ControlStream(stream ControlRequest) returns (stream ControlResponse) {}
 
   // Unary call for single control operations.
-  rpc Control(ControlRequest) returns (ControlResponse) {}
+  rpc BroadcastControl(ControlRequest) returns (ControlResponse) {}
+
+  // 注册 agent
+  rpc Register(RegisterReq) returns (RegisterRes) {}
+  // 注销 agent
+  rpc Unregister(UnregisterReq) returns (UnregisterRes) {}
+  // agent 心跳
+  rpc Heartbeat(HeartbeatReq) returns (HeartbeatRes) {}
+  // 操作agent stream长连接
+  rpc Operate(OperateReq) returns (stream OperateRes) {}
 }
 
 // Unified request for device control.
@@ -92,4 +101,46 @@ enum CommandType {
   EXECUTE = 2;
   SUBSCRIBE = 3;
   UNSUBSCRIBE = 4;
+}
+
+message RegisterReq {
+  uint64 ObjectId = 1;
+  string Name = 2;
+  string Version = 3;
+  string ipv4 = 4; // 主机的内网IPv4地址
+  string ipv6 = 5; // 主机的内网IPv6地址
+}
+
+message RegisterRes {
+  uint64 ObjectId = 1;
+  string Name = 2;
+  string Version = 3;
+  string ipv4 = 4; // 主机的内网IPv4地址
+  string ipv6 = 5; // 主机的内网IPv6地址
+}
+
+message UnregisterReq {
+  uint64 ObjectId = 1;
+}
+
+message UnregisterRes {
+
+}
+
+message HeartbeatReq {
+  uint64 ObjectId = 1;                        // agent 的id
+}
+
+message HeartbeatRes {
+  // 配置uuid
+  uint64 ObjectId = 1;                        // agent 的id
+}
+
+message OperateReq {
+  uint64 ObjectId = 1;
+  ControlRequest request = 2;
+}
+
+message OperateRes {
+  int32 Code = 1;                         // 返回码
 }
