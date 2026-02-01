@@ -9,7 +9,7 @@ import "google/protobuf/timestamp.proto";
 // ControlService provides interfaces for real-time device control.
 service ControlService {
   // Bidirectional stream for real-time control and feedback.
-  rpc ControlStream(stream ControlRequest) returns (stream ControlStreamResponse) {}
+  rpc Control(ControlRequest) returns (ControlResponse) {}
 
   // Unary call for single control operations.
   rpc BroadcastControl(ControlRequest) returns (ControlResponse) {}
