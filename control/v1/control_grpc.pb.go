@@ -64,7 +64,7 @@ func (c *controlServiceClient) ControlStream(ctx context.Context, opts ...grpc.C
 
 type ControlService_ControlStreamClient interface {
 	Send(*ControlRequest) error
-	Recv() (*ControlResponse, error)
+	Recv() (*ControlStreamResponse, error)
 	grpc.ClientStream
 }
 
@@ -76,8 +76,8 @@ func (x *controlServiceControlStreamClient) Send(m *ControlRequest) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *controlServiceControlStreamClient) Recv() (*ControlResponse, error) {
-	m := new(ControlResponse)
+func (x *controlServiceControlStreamClient) Recv() (*ControlStreamResponse, error) {
+	m := new(ControlStreamResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -211,7 +211,7 @@ func _ControlService_ControlStream_Handler(srv interface{}, stream grpc.ServerSt
 }
 
 type ControlService_ControlStreamServer interface {
-	Send(*ControlResponse) error
+	Send(*ControlStreamResponse) error
 	Recv() (*ControlRequest, error)
 	grpc.ServerStream
 }
@@ -220,7 +220,7 @@ type controlServiceControlStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *controlServiceControlStreamServer) Send(m *ControlResponse) error {
+func (x *controlServiceControlStreamServer) Send(m *ControlStreamResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
