@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	ControlService_ControlStream_FullMethodName    = "/control.v1.ControlService/ControlStream"
+	ControlService_Control_FullMethodName          = "/control.v1.ControlService/Control"
 	ControlService_BroadcastControl_FullMethodName = "/control.v1.ControlService/BroadcastControl"
 	ControlService_Register_FullMethodName         = "/control.v1.ControlService/Register"
 	ControlService_Unregister_FullMethodName       = "/control.v1.ControlService/Unregister"
@@ -32,7 +32,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ControlServiceClient interface {
 	// Bidirectional stream for real-time control and feedback.
-	ControlStream(ctx context.Context, opts ...grpc.CallOption) (ControlService_ControlStreamClient, error)
+	Control(ctx context.Context, in *ControlRequest, opts ...grpc.CallOption) (*ControlResponse, error)
 	// Unary call for single control operations.
 	BroadcastControl(ctx context.Context, in *ControlRequest, opts ...grpc.CallOption) (*ControlResponse, error)
 	// 注册 agent
@@ -53,35 +53,13 @@ func NewControlServiceClient(cc grpc.ClientConnInterface) ControlServiceClient {
 	return &controlServiceClient{cc}
 }
 
-func (c *controlServiceClient) ControlStream(ctx context.Context, opts ...grpc.CallOption) (ControlService_ControlStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ControlService_ServiceDesc.Streams[0], ControlService_ControlStream_FullMethodName, opts...)
+func (c *controlServiceClient) Control(ctx context.Context, in *ControlRequest, opts ...grpc.CallOption) (*ControlResponse, error) {
+	out := new(ControlResponse)
+	err := c.cc.Invoke(ctx, ControlService_Control_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &controlServiceControlStreamClient{stream}
-	return x, nil
-}
-
-type ControlService_ControlStreamClient interface {
-	Send(*ControlRequest) error
-	Recv() (*ControlStreamResponse, error)
-	grpc.ClientStream
-}
-
-type controlServiceControlStreamClient struct {
-	grpc.ClientStream
-}
-
-func (x *controlServiceControlStreamClient) Send(m *ControlRequest) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *controlServiceControlStreamClient) Recv() (*ControlStreamResponse, error) {
-	m := new(ControlStreamResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 func (c *controlServiceClient) BroadcastControl(ctx context.Context, in *ControlRequest, opts ...grpc.CallOption) (*ControlResponse, error) {
@@ -121,7 +99,7 @@ func (c *controlServiceClient) Heartbeat(ctx context.Context, in *HeartbeatReq, 
 }
 
 func (c *controlServiceClient) Operate(ctx context.Context, in *OperateReq, opts ...grpc.CallOption) (ControlService_OperateClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ControlService_ServiceDesc.Streams[1], ControlService_Operate_FullMethodName, opts...)
+	stream, err := c.cc.NewStream(ctx, &ControlService_ServiceDesc.Streams[0], ControlService_Operate_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +135,7 @@ func (x *controlServiceOperateClient) Recv() (*OperateRes, error) {
 // for forward compatibility
 type ControlServiceServer interface {
 	// Bidirectional stream for real-time control and feedback.
-	ControlStream(ControlService_ControlStreamServer) error
+	Control(context.Context, *ControlRequest) (*ControlResponse, error)
 	// Unary call for single control operations.
 	BroadcastControl(context.Context, *ControlRequest) (*ControlResponse, error)
 	// 注册 agent
@@ -175,8 +153,8 @@ type ControlServiceServer interface {
 type UnimplementedControlServiceServer struct {
 }
 
-func (UnimplementedControlServiceServer) ControlStream(ControlService_ControlStreamServer) error {
-	return status.Errorf(codes.Unimplemented, "method ControlStream not implemented")
+func (UnimplementedControlServiceServer) Control(context.Context, *ControlRequest) (*ControlResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Control not implemented")
 }
 func (UnimplementedControlServiceServer) BroadcastControl(context.Context, *ControlRequest) (*ControlResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BroadcastControl not implemented")
@@ -206,30 +184,22 @@ func RegisterControlServiceServer(s grpc.ServiceRegistrar, srv ControlServiceSer
 	s.RegisterService(&ControlService_ServiceDesc, srv)
 }
 
-func _ControlService_ControlStream_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(ControlServiceServer).ControlStream(&controlServiceControlStreamServer{stream})
-}
-
-type ControlService_ControlStreamServer interface {
-	Send(*ControlStreamResponse) error
-	Recv() (*ControlRequest, error)
-	grpc.ServerStream
-}
-
-type controlServiceControlStreamServer struct {
-	grpc.ServerStream
-}
-
-func (x *controlServiceControlStreamServer) Send(m *ControlStreamResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *controlServiceControlStreamServer) Recv() (*ControlRequest, error) {
-	m := new(ControlRequest)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _ControlService_Control_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ControlRequest)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
+	if interceptor == nil {
+		return srv.(ControlServiceServer).Control(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ControlService_Control_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControlServiceServer).Control(ctx, req.(*ControlRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _ControlService_BroadcastControl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -333,6 +303,10 @@ var ControlService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ControlServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Control",
+			Handler:    _ControlService_Control_Handler,
+		},
+		{
 			MethodName: "BroadcastControl",
 			Handler:    _ControlService_BroadcastControl_Handler,
 		},
@@ -350,12 +324,6 @@ var ControlService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "ControlStream",
-			Handler:       _ControlService_ControlStream_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
-		},
 		{
 			StreamName:    "Operate",
 			Handler:       _ControlService_Operate_Handler,
