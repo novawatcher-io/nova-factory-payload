@@ -99,6 +99,7 @@ message ControlStreamResponse {
 message ControlResponse {
   int32 Code = 1;                         // 返回码
   string Message = 2;
+  string request_id = 3;      // Unique identifier for tracking (UUID).
 }
 
 enum CommandType {
