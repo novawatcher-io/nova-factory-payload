@@ -144,9 +144,9 @@ message HeartbeatRes {
 
 message OperateReq {
   uint64 ObjectId = 1;
-  ControlRequest request = 2;
 }
 
 message OperateRes {
   int32 Code = 1;                         // 返回码
+  ControlRequest request = 2;
 }
