@@ -39,16 +39,21 @@ message ControlRequest {
 
 enum ValueType {
   VALUE_TYPE_UNSPECIFIED = 0;
-  VALUE_TYPE_STRING = 1;
-  VALUE_TYPE_BOOL = 2;
-  VALUE_TYPE_INT64 = 3;
-  VALUE_TYPE_UINT64 = 4;
-  VALUE_TYPE_DOUBLE = 5;
-  VALUE_TYPE_FLOAT = 6;
-  VALUE_TYPE_ARRAY = 7;
-  VALUE_TYPE_KVLIST = 8;
-  VALUE_TYPE_BYTES = 9;
-  VALUE_TYPE_NULL = 10;
+  VALUE_TYPE_BIT = 1;
+  VALUE_TYPE_UINT8 = 2;
+  VALUE_TYPE_UINT16 = 3;
+  VALUE_TYPE_UINT32 = 4;
+  VALUE_TYPE_UINT64 = 5;
+
+  VALUE_TYPE_INT8 = 6;
+  VALUE_TYPE_INT16 = 7;
+  VALUE_TYPE_INT32 = 8;
+  VALUE_TYPE_INT64 = 9;
+
+  VALUE_TYPE_FLOAT32 = 10;
+  VALUE_TYPE_FLOAT64 = 11;
+
+  VALUE_TYPE_STRING = 12;
 }
 
 // Value is used to represent any type of attribute or control value.
@@ -56,16 +61,13 @@ message Value {
   ValueType type = 1;         // Explicit type for quick identification.
   
   oneof value {
-    string string_value = 2;
-    bool bool_value = 3;
-    int64 int_value = 4;
-    uint64 uint_value = 5;
-    double double_value = 6;
-    float float_value = 7;
-    ArrayValue array_value = 8;
-    KeyValueList kvlist_value = 9;
-    bytes bytes_value = 10;
-    bool null_value = 11;
+    bool byte_value = 2;
+    string string_value = 3;
+    bool bool_value = 4;
+    int64 int_value = 5;
+    uint64 uint_value = 6;
+    double double_value = 7;
+    float float_value = 8;
   }
 }
 
