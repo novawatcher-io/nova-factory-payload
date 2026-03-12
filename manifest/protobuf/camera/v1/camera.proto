@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package camera.v1;
+
+option go_package = "camera/v1";
+
+message CameraRequest {
+  uint64 device_id = 1;
+  uint64 agent_id = 2;
+  string name = 3;
+  CameraExt ext = 4;
+  uint64 time = 5;
+  string errMsg = 6;
+}
+
+message Channel {
+  string channel_id = 1;
+  string name = 2;
+  string url = 3;
+  string type = 4;
+}
+
+message CameraExt {
+  string manufacturer = 1; // 生产厂商
+  string model = 2; // 型号
+  string firmware = 3; // 固件版本
+  string name = 4; // 设备名
+  string serialNumber = 5;
+  string hardwareId = 6;
+}
+
+message CameraResponse {
+  int32 code = 1;
+}
+
+service CameraService {
+  rpc Report(CameraRequest) returns (CameraResponse) {}
+}
