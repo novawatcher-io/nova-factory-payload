@@ -12,6 +12,7 @@ message CameraRequest {
   uint64 time = 5;
   string errMsg = 6;
   repeated Channel channels = 7;
+  bool isOnLine = 8;
 }
 
 message Channel {
