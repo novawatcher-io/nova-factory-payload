@@ -26,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CameraServiceClient interface {
-	Report(ctx context.Context, in *CameraRequest, opts ...grpc.CallOption) (*CameraResponse, error)
+	Report(ctx context.Context, in *CameraData, opts ...grpc.CallOption) (*CameraResponse, error)
 }
 
 type cameraServiceClient struct {
@@ -37,7 +37,7 @@ func NewCameraServiceClient(cc grpc.ClientConnInterface) CameraServiceClient {
 	return &cameraServiceClient{cc}
 }
 
-func (c *cameraServiceClient) Report(ctx context.Context, in *CameraRequest, opts ...grpc.CallOption) (*CameraResponse, error) {
+func (c *cameraServiceClient) Report(ctx context.Context, in *CameraData, opts ...grpc.CallOption) (*CameraResponse, error) {
 	out := new(CameraResponse)
 	err := c.cc.Invoke(ctx, CameraService_Report_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -50,7 +50,7 @@ func (c *cameraServiceClient) Report(ctx context.Context, in *CameraRequest, opt
 // All implementations must embed UnimplementedCameraServiceServer
 // for forward compatibility
 type CameraServiceServer interface {
-	Report(context.Context, *CameraRequest) (*CameraResponse, error)
+	Report(context.Context, *CameraData) (*CameraResponse, error)
 	mustEmbedUnimplementedCameraServiceServer()
 }
 
@@ -58,7 +58,7 @@ type CameraServiceServer interface {
 type UnimplementedCameraServiceServer struct {
 }
 
-func (UnimplementedCameraServiceServer) Report(context.Context, *CameraRequest) (*CameraResponse, error) {
+func (UnimplementedCameraServiceServer) Report(context.Context, *CameraData) (*CameraResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Report not implemented")
 }
 func (UnimplementedCameraServiceServer) mustEmbedUnimplementedCameraServiceServer() {}
@@ -75,7 +75,7 @@ func RegisterCameraServiceServer(s grpc.ServiceRegistrar, srv CameraServiceServe
 }
 
 func _CameraService_Report_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CameraRequest)
+	in := new(CameraData)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func _CameraService_Report_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: CameraService_Report_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CameraServiceServer).Report(ctx, req.(*CameraRequest))
+		return srv.(CameraServiceServer).Report(ctx, req.(*CameraData))
 	}
 	return interceptor(ctx, in, info, handler)
 }

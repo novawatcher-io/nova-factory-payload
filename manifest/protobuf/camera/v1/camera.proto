@@ -33,6 +33,9 @@ message CameraResponse {
   int32 code = 1;
 }
 
+message CameraData {
+  repeated CameraRequest request = 1;
+}
 service CameraService {
-  rpc Report(CameraRequest) returns (CameraResponse) {}
+  rpc Report(CameraData) returns (CameraResponse) {}
 }
