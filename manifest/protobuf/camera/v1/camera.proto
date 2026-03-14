@@ -132,6 +132,8 @@ message WebrtcBroadcastReply {
   uint32 delivered_count = 3;
   // 成功下发节点列表
   repeated string delivered_nodes = 4;
+  // Answer，Base64编码
+  string sdp64 = 5;
 }
 
 
