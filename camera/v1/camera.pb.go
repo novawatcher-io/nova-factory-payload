@@ -20,19 +20,28 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// CameraRequest 摄像头上报基础数据。
 type CameraRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DeviceId uint64     `protobuf:"varint,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	AgentId  uint64     `protobuf:"varint,2,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
-	Name     string     `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Ext      *CameraExt `protobuf:"bytes,4,opt,name=ext,proto3" json:"ext,omitempty"`
-	Time     uint64     `protobuf:"varint,5,opt,name=time,proto3" json:"time,omitempty"`
-	ErrMsg   string     `protobuf:"bytes,6,opt,name=errMsg,proto3" json:"errMsg,omitempty"`
+	// 设备ID
+	DeviceId uint64 `protobuf:"varint,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// 网关ID
+	AgentId uint64 `protobuf:"varint,2,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
+	// 摄像头名称
+	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	// 摄像头扩展信息
+	Ext *CameraExt `protobuf:"bytes,4,opt,name=ext,proto3" json:"ext,omitempty"`
+	// 上报时间（秒级时间戳）
+	Time uint64 `protobuf:"varint,5,opt,name=time,proto3" json:"time,omitempty"`
+	// 异常信息
+	ErrMsg string `protobuf:"bytes,6,opt,name=errMsg,proto3" json:"errMsg,omitempty"`
+	// 摄像头通道列表
 	Channels []*Channel `protobuf:"bytes,7,rep,name=channels,proto3" json:"channels,omitempty"`
-	IsOnLine bool       `protobuf:"varint,8,opt,name=isOnLine,proto3" json:"isOnLine,omitempty"`
+	// 在线状态
+	IsOnLine bool `protobuf:"varint,8,opt,name=isOnLine,proto3" json:"isOnLine,omitempty"`
 }
 
 func (x *CameraRequest) Reset() {
@@ -123,15 +132,20 @@ func (x *CameraRequest) GetIsOnLine() bool {
 	return false
 }
 
+// Channel 摄像头通道信息。
 type Channel struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// 通道ID
 	ChannelId string `protobuf:"bytes,1,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
-	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Url       string `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
-	Type      string `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
+	// 通道名称
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// 通道流地址
+	Url string `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
+	// 通道协议类型
+	Type string `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
 }
 
 func (x *Channel) Reset() {
@@ -194,6 +208,7 @@ func (x *Channel) GetType() string {
 	return ""
 }
 
+// CameraExt 摄像头设备扩展信息。
 type CameraExt struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -203,8 +218,10 @@ type CameraExt struct {
 	Model        string `protobuf:"bytes,2,opt,name=model,proto3" json:"model,omitempty"`               // 型号
 	Firmware     string `protobuf:"bytes,3,opt,name=firmware,proto3" json:"firmware,omitempty"`         // 固件版本
 	Name         string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`                 // 设备名
+	// 序列号
 	SerialNumber string `protobuf:"bytes,5,opt,name=serialNumber,proto3" json:"serialNumber,omitempty"`
-	HardwareId   string `protobuf:"bytes,6,opt,name=hardwareId,proto3" json:"hardwareId,omitempty"`
+	// 硬件ID
+	HardwareId string `protobuf:"bytes,6,opt,name=hardwareId,proto3" json:"hardwareId,omitempty"`
 }
 
 func (x *CameraExt) Reset() {
@@ -281,11 +298,13 @@ func (x *CameraExt) GetHardwareId() string {
 	return ""
 }
 
+// CameraResponse 摄像头上报响应。
 type CameraResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// 响应状态码
 	Code int32 `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
 }
 
@@ -328,11 +347,13 @@ func (x *CameraResponse) GetCode() int32 {
 	return 0
 }
 
+// CameraData 摄像头批量上报数据。
 type CameraData struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// 批量上报请求列表
 	Request []*CameraRequest `protobuf:"bytes,1,rep,name=request,proto3" json:"request,omitempty"`
 }
 
@@ -371,6 +392,425 @@ func (*CameraData) Descriptor() ([]byte, []int) {
 func (x *CameraData) GetRequest() []*CameraRequest {
 	if x != nil {
 		return x.Request
+	}
+	return nil
+}
+
+// SubscribeRequest 订阅摄像头协商任务请求。
+type SubscribeRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 网关节点名称
+	Node string `protobuf:"bytes,1,opt,name=node,proto3" json:"node,omitempty"`
+}
+
+func (x *SubscribeRequest) Reset() {
+	*x = SubscribeRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_camera_v1_camera_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SubscribeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeRequest) ProtoMessage() {}
+
+func (x *SubscribeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_camera_v1_camera_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeRequest.ProtoReflect.Descriptor instead.
+func (*SubscribeRequest) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_camera_v1_camera_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *SubscribeRequest) GetNode() string {
+	if x != nil {
+		return x.Node
+	}
+	return ""
+}
+
+// SubscribeMessage 下发给网关的协商任务。
+type SubscribeMessage struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 设备ID
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// 通道ID
+	ChannelId string `protobuf:"bytes,2,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	// 前端Offer，Base64编码
+	Sdp64 string `protobuf:"bytes,3,opt,name=sdp64,proto3" json:"sdp64,omitempty"`
+}
+
+func (x *SubscribeMessage) Reset() {
+	*x = SubscribeMessage{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_camera_v1_camera_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SubscribeMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeMessage) ProtoMessage() {}
+
+func (x *SubscribeMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_camera_v1_camera_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeMessage.ProtoReflect.Descriptor instead.
+func (*SubscribeMessage) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_camera_v1_camera_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *SubscribeMessage) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *SubscribeMessage) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *SubscribeMessage) GetSdp64() string {
+	if x != nil {
+		return x.Sdp64
+	}
+	return ""
+}
+
+// TokenAck 网关回传协商结果。
+type TokenAck struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 设备ID
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// 通道ID
+	ChannelId string `protobuf:"bytes,2,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	// 播放令牌或协商结果标识
+	Token string `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
+	// WebRTC播放地址
+	PlayUrl string `protobuf:"bytes,4,opt,name=play_url,json=playUrl,proto3" json:"play_url,omitempty"`
+	// WHEP播放地址
+	WhepUrl string `protobuf:"bytes,5,opt,name=whep_url,json=whepUrl,proto3" json:"whep_url,omitempty"`
+	// Answer，Base64编码
+	Sdp64 string `protobuf:"bytes,6,opt,name=sdp64,proto3" json:"sdp64,omitempty"`
+}
+
+func (x *TokenAck) Reset() {
+	*x = TokenAck{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_camera_v1_camera_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *TokenAck) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TokenAck) ProtoMessage() {}
+
+func (x *TokenAck) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_camera_v1_camera_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TokenAck.ProtoReflect.Descriptor instead.
+func (*TokenAck) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_camera_v1_camera_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *TokenAck) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *TokenAck) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *TokenAck) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *TokenAck) GetPlayUrl() string {
+	if x != nil {
+		return x.PlayUrl
+	}
+	return ""
+}
+
+func (x *TokenAck) GetWhepUrl() string {
+	if x != nil {
+		return x.WhepUrl
+	}
+	return ""
+}
+
+func (x *TokenAck) GetSdp64() string {
+	if x != nil {
+		return x.Sdp64
+	}
+	return ""
+}
+
+// SendTokenReply 发送令牌响应。
+type SendTokenReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *SendTokenReply) Reset() {
+	*x = SendTokenReply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_camera_v1_camera_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SendTokenReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendTokenReply) ProtoMessage() {}
+
+func (x *SendTokenReply) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_camera_v1_camera_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SendTokenReply.ProtoReflect.Descriptor instead.
+func (*SendTokenReply) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_camera_v1_camera_proto_rawDescGZIP(), []int{8}
+}
+
+// WebrtcBroadcastRequest WebRTC广播请求。
+type WebrtcBroadcastRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 请求唯一ID，便于链路追踪
+	RequestId string `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	// 来源服务标识（通常为HTTP服务）
+	Source string `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"`
+	// 目标节点，留空表示广播到全部节点
+	TargetNode string `protobuf:"bytes,3,opt,name=target_node,json=targetNode,proto3" json:"target_node,omitempty"`
+	// 设备ID
+	DeviceId string `protobuf:"bytes,4,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// 通道ID
+	ChannelId string `protobuf:"bytes,5,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	// Offer，Base64编码
+	Sdp64 string `protobuf:"bytes,6,opt,name=sdp64,proto3" json:"sdp64,omitempty"`
+}
+
+func (x *WebrtcBroadcastRequest) Reset() {
+	*x = WebrtcBroadcastRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_camera_v1_camera_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WebrtcBroadcastRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WebrtcBroadcastRequest) ProtoMessage() {}
+
+func (x *WebrtcBroadcastRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_camera_v1_camera_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WebrtcBroadcastRequest.ProtoReflect.Descriptor instead.
+func (*WebrtcBroadcastRequest) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_camera_v1_camera_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *WebrtcBroadcastRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *WebrtcBroadcastRequest) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *WebrtcBroadcastRequest) GetTargetNode() string {
+	if x != nil {
+		return x.TargetNode
+	}
+	return ""
+}
+
+func (x *WebrtcBroadcastRequest) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *WebrtcBroadcastRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *WebrtcBroadcastRequest) GetSdp64() string {
+	if x != nil {
+		return x.Sdp64
+	}
+	return ""
+}
+
+// WebrtcBroadcastReply WebRTC广播响应。
+type WebrtcBroadcastReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 响应状态码
+	Code int32 `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	// 响应消息
+	Msg string `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
+	// 成功下发节点数量
+	DeliveredCount uint32 `protobuf:"varint,3,opt,name=delivered_count,json=deliveredCount,proto3" json:"delivered_count,omitempty"`
+	// 成功下发节点列表
+	DeliveredNodes []string `protobuf:"bytes,4,rep,name=delivered_nodes,json=deliveredNodes,proto3" json:"delivered_nodes,omitempty"`
+}
+
+func (x *WebrtcBroadcastReply) Reset() {
+	*x = WebrtcBroadcastReply{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_manifest_protobuf_camera_v1_camera_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WebrtcBroadcastReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WebrtcBroadcastReply) ProtoMessage() {}
+
+func (x *WebrtcBroadcastReply) ProtoReflect() protoreflect.Message {
+	mi := &file_manifest_protobuf_camera_v1_camera_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WebrtcBroadcastReply.ProtoReflect.Descriptor instead.
+func (*WebrtcBroadcastReply) Descriptor() ([]byte, []int) {
+	return file_manifest_protobuf_camera_v1_camera_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *WebrtcBroadcastReply) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *WebrtcBroadcastReply) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
+func (x *WebrtcBroadcastReply) GetDeliveredCount() uint32 {
+	if x != nil {
+		return x.DeliveredCount
+	}
+	return 0
+}
+
+func (x *WebrtcBroadcastReply) GetDeliveredNodes() []string {
+	if x != nil {
+		return x.DeliveredNodes
 	}
 	return nil
 }
@@ -421,13 +861,70 @@ var file_manifest_protobuf_camera_v1_camera_proto_rawDesc = []byte{
 	0x65, 0x72, 0x61, 0x44, 0x61, 0x74, 0x61, 0x12, 0x32, 0x0a, 0x07, 0x72, 0x65, 0x71, 0x75, 0x65,
 	0x73, 0x74, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x63, 0x61, 0x6d, 0x65, 0x72,
 	0x61, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x52, 0x07, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x32, 0x4d, 0x0a, 0x0d, 0x43,
-	0x61, 0x6d, 0x65, 0x72, 0x61, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x3c, 0x0a, 0x06,
-	0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x15, 0x2e, 0x63, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x2e,
-	0x76, 0x31, 0x2e, 0x43, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x44, 0x61, 0x74, 0x61, 0x1a, 0x19, 0x2e,
-	0x63, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x61, 0x6d, 0x65, 0x72, 0x61,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x0b, 0x5a, 0x09, 0x63, 0x61,
-	0x6d, 0x65, 0x72, 0x61, 0x2f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x73, 0x74, 0x52, 0x07, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x26, 0x0a, 0x10, 0x53,
+	0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x12, 0x0a, 0x04, 0x6e, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e,
+	0x6f, 0x64, 0x65, 0x22, 0x64, 0x0a, 0x10, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65,
+	0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x64, 0x65, 0x76, 0x69, 0x63,
+	0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x64, 0x65, 0x76, 0x69,
+	0x63, 0x65, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x5f,
+	0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x63, 0x68, 0x61, 0x6e, 0x6e, 0x65,
+	0x6c, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x73, 0x64, 0x70, 0x36, 0x34, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x05, 0x73, 0x64, 0x70, 0x36, 0x34, 0x22, 0xa8, 0x01, 0x0a, 0x08, 0x54, 0x6f,
+	0x6b, 0x65, 0x6e, 0x41, 0x63, 0x6b, 0x12, 0x1b, 0x0a, 0x09, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65,
+	0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x64, 0x65, 0x76, 0x69, 0x63,
+	0x65, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x5f, 0x69,
+	0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x63, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c,
+	0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x19, 0x0a, 0x08, 0x70, 0x6c, 0x61, 0x79,
+	0x5f, 0x75, 0x72, 0x6c, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x70, 0x6c, 0x61, 0x79,
+	0x55, 0x72, 0x6c, 0x12, 0x19, 0x0a, 0x08, 0x77, 0x68, 0x65, 0x70, 0x5f, 0x75, 0x72, 0x6c, 0x18,
+	0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x77, 0x68, 0x65, 0x70, 0x55, 0x72, 0x6c, 0x12, 0x14,
+	0x0a, 0x05, 0x73, 0x64, 0x70, 0x36, 0x34, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x73,
+	0x64, 0x70, 0x36, 0x34, 0x22, 0x10, 0x0a, 0x0e, 0x53, 0x65, 0x6e, 0x64, 0x54, 0x6f, 0x6b, 0x65,
+	0x6e, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0xc2, 0x01, 0x0a, 0x16, 0x57, 0x65, 0x62, 0x72, 0x74,
+	0x63, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x5f, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x49, 0x64,
+	0x12, 0x16, 0x0a, 0x06, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x06, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x12, 0x1f, 0x0a, 0x0b, 0x74, 0x61, 0x72, 0x67,
+	0x65, 0x74, 0x5f, 0x6e, 0x6f, 0x64, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x74,
+	0x61, 0x72, 0x67, 0x65, 0x74, 0x4e, 0x6f, 0x64, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x64, 0x65, 0x76,
+	0x69, 0x63, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x64, 0x65,
+	0x76, 0x69, 0x63, 0x65, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x68, 0x61, 0x6e, 0x6e, 0x65,
+	0x6c, 0x5f, 0x69, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x63, 0x68, 0x61, 0x6e,
+	0x6e, 0x65, 0x6c, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x73, 0x64, 0x70, 0x36, 0x34, 0x18, 0x06,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x73, 0x64, 0x70, 0x36, 0x34, 0x22, 0x8e, 0x01, 0x0a, 0x14,
+	0x57, 0x65, 0x62, 0x72, 0x74, 0x63, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x52,
+	0x65, 0x70, 0x6c, 0x79, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x05, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x6d, 0x73, 0x67, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6d, 0x73, 0x67, 0x12, 0x27, 0x0a, 0x0f, 0x64, 0x65,
+	0x6c, 0x69, 0x76, 0x65, 0x72, 0x65, 0x64, 0x5f, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x0d, 0x52, 0x0e, 0x64, 0x65, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x65, 0x64, 0x43, 0x6f,
+	0x75, 0x6e, 0x74, 0x12, 0x27, 0x0a, 0x0f, 0x64, 0x65, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x65, 0x64,
+	0x5f, 0x6e, 0x6f, 0x64, 0x65, 0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x09, 0x52, 0x0e, 0x64, 0x65,
+	0x6c, 0x69, 0x76, 0x65, 0x72, 0x65, 0x64, 0x4e, 0x6f, 0x64, 0x65, 0x73, 0x32, 0xb6, 0x02, 0x0a,
+	0x0d, 0x43, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x3c,
+	0x0a, 0x06, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x15, 0x2e, 0x63, 0x61, 0x6d, 0x65, 0x72,
+	0x61, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x44, 0x61, 0x74, 0x61, 0x1a,
+	0x19, 0x2e, 0x63, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x61, 0x6d, 0x65,
+	0x72, 0x61, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x4d, 0x0a, 0x0f,
+	0x57, 0x65, 0x62, 0x72, 0x74, 0x63, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x12,
+	0x1b, 0x2e, 0x63, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x75, 0x62, 0x73,
+	0x63, 0x72, 0x69, 0x62, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x63,
+	0x61, 0x6d, 0x65, 0x72, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69,
+	0x62, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x30, 0x01, 0x12, 0x41, 0x0a, 0x0f, 0x57,
+	0x65, 0x62, 0x72, 0x74, 0x63, 0x53, 0x65, 0x6e, 0x64, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x13,
+	0x2e, 0x63, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x54, 0x6f, 0x6b, 0x65, 0x6e,
+	0x41, 0x63, 0x6b, 0x1a, 0x19, 0x2e, 0x63, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x2e, 0x76, 0x31, 0x2e,
+	0x53, 0x65, 0x6e, 0x64, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x12, 0x55,
+	0x0a, 0x0f, 0x57, 0x65, 0x62, 0x72, 0x74, 0x63, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73,
+	0x74, 0x12, 0x21, 0x2e, 0x63, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x65,
+	0x62, 0x72, 0x74, 0x63, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x63, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x2e, 0x76, 0x31,
+	0x2e, 0x57, 0x65, 0x62, 0x72, 0x74, 0x63, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74,
+	0x52, 0x65, 0x70, 0x6c, 0x79, 0x42, 0x0b, 0x5a, 0x09, 0x63, 0x61, 0x6d, 0x65, 0x72, 0x61, 0x2f,
+	0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -442,25 +939,37 @@ func file_manifest_protobuf_camera_v1_camera_proto_rawDescGZIP() []byte {
 	return file_manifest_protobuf_camera_v1_camera_proto_rawDescData
 }
 
-var file_manifest_protobuf_camera_v1_camera_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_manifest_protobuf_camera_v1_camera_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_manifest_protobuf_camera_v1_camera_proto_goTypes = []interface{}{
-	(*CameraRequest)(nil),  // 0: camera.v1.CameraRequest
-	(*Channel)(nil),        // 1: camera.v1.Channel
-	(*CameraExt)(nil),      // 2: camera.v1.CameraExt
-	(*CameraResponse)(nil), // 3: camera.v1.CameraResponse
-	(*CameraData)(nil),     // 4: camera.v1.CameraData
+	(*CameraRequest)(nil),          // 0: camera.v1.CameraRequest
+	(*Channel)(nil),                // 1: camera.v1.Channel
+	(*CameraExt)(nil),              // 2: camera.v1.CameraExt
+	(*CameraResponse)(nil),         // 3: camera.v1.CameraResponse
+	(*CameraData)(nil),             // 4: camera.v1.CameraData
+	(*SubscribeRequest)(nil),       // 5: camera.v1.SubscribeRequest
+	(*SubscribeMessage)(nil),       // 6: camera.v1.SubscribeMessage
+	(*TokenAck)(nil),               // 7: camera.v1.TokenAck
+	(*SendTokenReply)(nil),         // 8: camera.v1.SendTokenReply
+	(*WebrtcBroadcastRequest)(nil), // 9: camera.v1.WebrtcBroadcastRequest
+	(*WebrtcBroadcastReply)(nil),   // 10: camera.v1.WebrtcBroadcastReply
 }
 var file_manifest_protobuf_camera_v1_camera_proto_depIdxs = []int32{
-	2, // 0: camera.v1.CameraRequest.ext:type_name -> camera.v1.CameraExt
-	1, // 1: camera.v1.CameraRequest.channels:type_name -> camera.v1.Channel
-	0, // 2: camera.v1.CameraData.request:type_name -> camera.v1.CameraRequest
-	4, // 3: camera.v1.CameraService.Report:input_type -> camera.v1.CameraData
-	3, // 4: camera.v1.CameraService.Report:output_type -> camera.v1.CameraResponse
-	4, // [4:5] is the sub-list for method output_type
-	3, // [3:4] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2,  // 0: camera.v1.CameraRequest.ext:type_name -> camera.v1.CameraExt
+	1,  // 1: camera.v1.CameraRequest.channels:type_name -> camera.v1.Channel
+	0,  // 2: camera.v1.CameraData.request:type_name -> camera.v1.CameraRequest
+	4,  // 3: camera.v1.CameraService.Report:input_type -> camera.v1.CameraData
+	5,  // 4: camera.v1.CameraService.WebrtcSubscribe:input_type -> camera.v1.SubscribeRequest
+	7,  // 5: camera.v1.CameraService.WebrtcSendToken:input_type -> camera.v1.TokenAck
+	9,  // 6: camera.v1.CameraService.WebrtcBroadcast:input_type -> camera.v1.WebrtcBroadcastRequest
+	3,  // 7: camera.v1.CameraService.Report:output_type -> camera.v1.CameraResponse
+	6,  // 8: camera.v1.CameraService.WebrtcSubscribe:output_type -> camera.v1.SubscribeMessage
+	8,  // 9: camera.v1.CameraService.WebrtcSendToken:output_type -> camera.v1.SendTokenReply
+	10, // 10: camera.v1.CameraService.WebrtcBroadcast:output_type -> camera.v1.WebrtcBroadcastReply
+	7,  // [7:11] is the sub-list for method output_type
+	3,  // [3:7] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_manifest_protobuf_camera_v1_camera_proto_init() }
@@ -529,6 +1038,78 @@ func file_manifest_protobuf_camera_v1_camera_proto_init() {
 				return nil
 			}
 		}
+		file_manifest_protobuf_camera_v1_camera_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SubscribeRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_manifest_protobuf_camera_v1_camera_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SubscribeMessage); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_manifest_protobuf_camera_v1_camera_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*TokenAck); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_manifest_protobuf_camera_v1_camera_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SendTokenReply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_manifest_protobuf_camera_v1_camera_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WebrtcBroadcastRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_manifest_protobuf_camera_v1_camera_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WebrtcBroadcastReply); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -536,7 +1117,7 @@ func file_manifest_protobuf_camera_v1_camera_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_manifest_protobuf_camera_v1_camera_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

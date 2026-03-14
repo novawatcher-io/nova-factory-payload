@@ -19,14 +19,24 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	CameraService_Report_FullMethodName = "/camera.v1.CameraService/Report"
+	CameraService_Report_FullMethodName          = "/camera.v1.CameraService/Report"
+	CameraService_WebrtcSubscribe_FullMethodName = "/camera.v1.CameraService/WebrtcSubscribe"
+	CameraService_WebrtcSendToken_FullMethodName = "/camera.v1.CameraService/WebrtcSendToken"
+	CameraService_WebrtcBroadcast_FullMethodName = "/camera.v1.CameraService/WebrtcBroadcast"
 )
 
 // CameraServiceClient is the client API for CameraService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CameraServiceClient interface {
+	// Report 批量上报摄像头状态数据。
 	Report(ctx context.Context, in *CameraData, opts ...grpc.CallOption) (*CameraResponse, error)
+	// Subscribe 订阅摄像头协商任务流。
+	WebrtcSubscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (CameraService_WebrtcSubscribeClient, error)
+	// SendToken 回传播放令牌与协商结果。
+	WebrtcSendToken(ctx context.Context, in *TokenAck, opts ...grpc.CallOption) (*SendTokenReply, error)
+	// WebrtcBroadcast 接收广播请求并转发到下游节点。
+	WebrtcBroadcast(ctx context.Context, in *WebrtcBroadcastRequest, opts ...grpc.CallOption) (*WebrtcBroadcastReply, error)
 }
 
 type cameraServiceClient struct {
@@ -46,11 +56,68 @@ func (c *cameraServiceClient) Report(ctx context.Context, in *CameraData, opts .
 	return out, nil
 }
 
+func (c *cameraServiceClient) WebrtcSubscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (CameraService_WebrtcSubscribeClient, error) {
+	stream, err := c.cc.NewStream(ctx, &CameraService_ServiceDesc.Streams[0], CameraService_WebrtcSubscribe_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &cameraServiceWebrtcSubscribeClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type CameraService_WebrtcSubscribeClient interface {
+	Recv() (*SubscribeMessage, error)
+	grpc.ClientStream
+}
+
+type cameraServiceWebrtcSubscribeClient struct {
+	grpc.ClientStream
+}
+
+func (x *cameraServiceWebrtcSubscribeClient) Recv() (*SubscribeMessage, error) {
+	m := new(SubscribeMessage)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *cameraServiceClient) WebrtcSendToken(ctx context.Context, in *TokenAck, opts ...grpc.CallOption) (*SendTokenReply, error) {
+	out := new(SendTokenReply)
+	err := c.cc.Invoke(ctx, CameraService_WebrtcSendToken_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cameraServiceClient) WebrtcBroadcast(ctx context.Context, in *WebrtcBroadcastRequest, opts ...grpc.CallOption) (*WebrtcBroadcastReply, error) {
+	out := new(WebrtcBroadcastReply)
+	err := c.cc.Invoke(ctx, CameraService_WebrtcBroadcast_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CameraServiceServer is the server API for CameraService service.
 // All implementations must embed UnimplementedCameraServiceServer
 // for forward compatibility
 type CameraServiceServer interface {
+	// Report 批量上报摄像头状态数据。
 	Report(context.Context, *CameraData) (*CameraResponse, error)
+	// Subscribe 订阅摄像头协商任务流。
+	WebrtcSubscribe(*SubscribeRequest, CameraService_WebrtcSubscribeServer) error
+	// SendToken 回传播放令牌与协商结果。
+	WebrtcSendToken(context.Context, *TokenAck) (*SendTokenReply, error)
+	// WebrtcBroadcast 接收广播请求并转发到下游节点。
+	WebrtcBroadcast(context.Context, *WebrtcBroadcastRequest) (*WebrtcBroadcastReply, error)
 	mustEmbedUnimplementedCameraServiceServer()
 }
 
@@ -60,6 +127,15 @@ type UnimplementedCameraServiceServer struct {
 
 func (UnimplementedCameraServiceServer) Report(context.Context, *CameraData) (*CameraResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Report not implemented")
+}
+func (UnimplementedCameraServiceServer) WebrtcSubscribe(*SubscribeRequest, CameraService_WebrtcSubscribeServer) error {
+	return status.Errorf(codes.Unimplemented, "method WebrtcSubscribe not implemented")
+}
+func (UnimplementedCameraServiceServer) WebrtcSendToken(context.Context, *TokenAck) (*SendTokenReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method WebrtcSendToken not implemented")
+}
+func (UnimplementedCameraServiceServer) WebrtcBroadcast(context.Context, *WebrtcBroadcastRequest) (*WebrtcBroadcastReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method WebrtcBroadcast not implemented")
 }
 func (UnimplementedCameraServiceServer) mustEmbedUnimplementedCameraServiceServer() {}
 
@@ -92,6 +168,63 @@ func _CameraService_Report_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CameraService_WebrtcSubscribe_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SubscribeRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(CameraServiceServer).WebrtcSubscribe(m, &cameraServiceWebrtcSubscribeServer{stream})
+}
+
+type CameraService_WebrtcSubscribeServer interface {
+	Send(*SubscribeMessage) error
+	grpc.ServerStream
+}
+
+type cameraServiceWebrtcSubscribeServer struct {
+	grpc.ServerStream
+}
+
+func (x *cameraServiceWebrtcSubscribeServer) Send(m *SubscribeMessage) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _CameraService_WebrtcSendToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenAck)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CameraServiceServer).WebrtcSendToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CameraService_WebrtcSendToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CameraServiceServer).WebrtcSendToken(ctx, req.(*TokenAck))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CameraService_WebrtcBroadcast_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WebrtcBroadcastRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CameraServiceServer).WebrtcBroadcast(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CameraService_WebrtcBroadcast_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CameraServiceServer).WebrtcBroadcast(ctx, req.(*WebrtcBroadcastRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CameraService_ServiceDesc is the grpc.ServiceDesc for CameraService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -103,7 +236,21 @@ var CameraService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Report",
 			Handler:    _CameraService_Report_Handler,
 		},
+		{
+			MethodName: "WebrtcSendToken",
+			Handler:    _CameraService_WebrtcSendToken_Handler,
+		},
+		{
+			MethodName: "WebrtcBroadcast",
+			Handler:    _CameraService_WebrtcBroadcast_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "WebrtcSubscribe",
+			Handler:       _CameraService_WebrtcSubscribe_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "manifest/protobuf/camera/v1/camera.proto",
 }
