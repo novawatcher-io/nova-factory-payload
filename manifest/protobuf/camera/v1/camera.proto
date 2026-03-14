@@ -4,40 +4,136 @@ package camera.v1;
 
 option go_package = "camera/v1";
 
+// CameraRequest 摄像头上报基础数据。
 message CameraRequest {
+  // 设备ID
   uint64 device_id = 1;
+  // 网关ID
   uint64 agent_id = 2;
+  // 摄像头名称
   string name = 3;
+  // 摄像头扩展信息
   CameraExt ext = 4;
+  // 上报时间（秒级时间戳）
   uint64 time = 5;
+  // 异常信息
   string errMsg = 6;
+  // 摄像头通道列表
   repeated Channel channels = 7;
+  // 在线状态
   bool isOnLine = 8;
 }
 
+// Channel 摄像头通道信息。
 message Channel {
+  // 通道ID
   string channel_id = 1;
+  // 通道名称
   string name = 2;
+  // 通道流地址
   string url = 3;
+  // 通道协议类型
   string type = 4;
 }
 
+// CameraExt 摄像头设备扩展信息。
 message CameraExt {
   string manufacturer = 1; // 生产厂商
   string model = 2; // 型号
   string firmware = 3; // 固件版本
   string name = 4; // 设备名
+  // 序列号
   string serialNumber = 5;
+  // 硬件ID
   string hardwareId = 6;
 }
 
+// CameraResponse 摄像头上报响应。
 message CameraResponse {
+  // 响应状态码
   int32 code = 1;
 }
 
+// CameraData 摄像头批量上报数据。
 message CameraData {
+  // 批量上报请求列表
   repeated CameraRequest request = 1;
 }
+
+// SubscribeRequest 订阅摄像头协商任务请求。
+message SubscribeRequest {
+  // 网关节点名称
+  string node = 1;
+}
+
+// SubscribeMessage 下发给网关的协商任务。
+message SubscribeMessage {
+  // 设备ID
+  string device_id = 1;
+  // 通道ID
+  string channel_id = 2;
+  // 前端Offer，Base64编码
+  string sdp64 = 3;
+}
+
+// TokenAck 网关回传协商结果。
+message TokenAck {
+  // 设备ID
+  string device_id = 1;
+  // 通道ID
+  string channel_id = 2;
+  // 播放令牌或协商结果标识
+  string token = 3;
+  // WebRTC播放地址
+  string play_url = 4;
+  // WHEP播放地址
+  string whep_url = 5;
+  // Answer，Base64编码
+  string sdp64 = 6;
+}
+
+// SendTokenReply 发送令牌响应。
+message SendTokenReply {}
+
+// WebrtcBroadcastRequest WebRTC广播请求。
+message WebrtcBroadcastRequest {
+  // 请求唯一ID，便于链路追踪
+  string request_id = 1;
+  // 来源服务标识（通常为HTTP服务）
+  string source = 2;
+  // 目标节点，留空表示广播到全部节点
+  string target_node = 3;
+  // 设备ID
+  string device_id = 4;
+  // 通道ID
+  string channel_id = 5;
+  // Offer，Base64编码
+  string sdp64 = 6;
+}
+
+// WebrtcBroadcastReply WebRTC广播响应。
+message WebrtcBroadcastReply {
+  // 响应状态码
+  int32 code = 1;
+  // 响应消息
+  string msg = 2;
+  // 成功下发节点数量
+  uint32 delivered_count = 3;
+  // 成功下发节点列表
+  repeated string delivered_nodes = 4;
+}
+
+
+
+
+// CameraService 摄像头上报服务。
 service CameraService {
+  // Report 批量上报摄像头状态数据。
   rpc Report(CameraData) returns (CameraResponse) {}
+  // Subscribe 订阅摄像头协商任务流。
+  rpc WebrtcSubscribe(SubscribeRequest) returns (stream SubscribeMessage);
+  // SendToken 回传播放令牌与协商结果。
+  rpc WebrtcSendToken(TokenAck) returns (SendTokenReply);
+  // WebrtcBroadcast 接收广播请求并转发到下游节点。
+  rpc WebrtcBroadcast(WebrtcBroadcastRequest) returns (WebrtcBroadcastReply);
 }
