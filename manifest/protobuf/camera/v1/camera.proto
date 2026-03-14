@@ -74,6 +74,8 @@ message SubscribeMessage {
   string channel_id = 2;
   // 前端Offer，Base64编码
   string sdp64 = 3;
+  // 请求id
+  string request_id = 4;
 }
 
 // TokenAck 网关回传协商结果。
@@ -94,10 +96,15 @@ message TokenAck {
   int32 code = 7;
   // errmsg 错误信息
   string errmsg = 8;
+  // 请求id
+  string request_id = 9;
 }
 
 // SendTokenReply 发送令牌响应。
-message SendTokenReply {}
+message SendTokenReply {
+  int32 code = 1;
+  string message = 2;
+}
 
 // WebrtcBroadcastRequest WebRTC广播请求。
 message WebrtcBroadcastRequest {
