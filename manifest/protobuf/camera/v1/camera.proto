@@ -90,6 +90,10 @@ message TokenAck {
   string whep_url = 5;
   // Answer，Base64编码
   string sdp64 = 6;
+  // Code 错误码
+  int32 code = 7;
+  // errmsg 错误信息
+  string errmsg = 8;
 }
 
 // SendTokenReply 发送令牌响应。
